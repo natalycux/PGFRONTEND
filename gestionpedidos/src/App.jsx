@@ -1,35 +1,103 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import MainLayout from './components/MainLayout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Pedidos from './pages/Pedidos';
+import Usuarios from './pages/Usuarios';
+import Bitacora from './pages/Bitacora';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Componente para proteger rutas
+const ProtectedRoute = ({ children, permission }) => {
+  const { isAuthenticated, hasPermission, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="loading">Cargando...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (permission && !hasPermission(permission)) {
+    return <Navigate to="/pedidos" replace />;
+  }
+  
+  return children;
+};
 
+function AppRoutes() {
+  const { isAuthenticated } = useAuth();
+  
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      <Route 
+        path="/login" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+      />
+      
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        
+        <Route 
+          path="dashboard" 
+          element={
+            <ProtectedRoute permission="dashboard">
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="pedidos" 
+          element={
+            <ProtectedRoute permission="pedidos">
+              <Pedidos />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="usuarios" 
+          element={
+            <ProtectedRoute permission="usuarios">
+              <Usuarios />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="bitacora" 
+          element={
+            <ProtectedRoute permission="bitacora">
+              <Bitacora />
+            </ProtectedRoute>
+          } 
+        />
+      </Route>
+      
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;
+
