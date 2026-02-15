@@ -33,14 +33,18 @@ const Pedidos = () => {
 
   const loadInitialData = async () => {
     try {
+      console.log('🔄 Cargando datos iniciales de pedidos...');
       const [ordersData, communitiesData] = await Promise.all([
         orderService.getAll(),
         communityService.getAll()
       ]);
+      console.log('📦 Pedidos recibidos:', ordersData);
+      console.log('🏘️ Comunidades recibidas:', communitiesData);
       setOrders(ordersData);
       setCommunities(communitiesData);
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      console.error('❌ Error cargando datos:', error);
+      console.error('❌ Detalles del error:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -52,10 +56,12 @@ const Pedidos = () => {
     
     if (communityId) {
       try {
+        console.log('🔄 Cargando clientes de la comunidad:', communityId);
         const clientsData = await clientService.getByCommunity(communityId);
+        console.log('👥 Clientes recibidos:', clientsData);
         setClients(clientsData);
       } catch (error) {
-        console.error('Error cargando clientes:', error);
+        console.error('❌ Error cargando clientes:', error);
       }
     } else {
       setClients([]);
@@ -159,8 +165,8 @@ const Pedidos = () => {
               >
                 <option value="">Selecciona una comunidad</option>
                 {communities.map(community => (
-                  <option key={community.id} value={community.id}>
-                    {community.name}
+                  <option key={community.idComunidad} value={community.idComunidad}>
+                    {community.nombreComunidad}
                   </option>
                 ))}
               </select>
@@ -176,8 +182,8 @@ const Pedidos = () => {
               >
                 <option value="">Primero selecciona una comunidad</option>
                 {clients.map(client => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
+                  <option key={client.idCliente} value={client.idCliente}>
+                    {client.nombreCompleto}
                   </option>
                 ))}
               </select>

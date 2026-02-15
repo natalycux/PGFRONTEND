@@ -11,14 +11,18 @@ const Bitacora = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('🔄 Cargando bitácora...');
         const [logsData, stats] = await Promise.all([
           auditLogService.getAll(),
           auditLogService.getStatistics()
         ]);
+        console.log('📋 Logs recibidos:', logsData);
+        console.log('📊 Estadísticas recibidas:', stats);
         setLogs(groupLogsByDate(logsData));
         setStatistics(stats);
       } catch (error) {
-        console.error('Error cargando bitácora:', error);
+        console.error('❌ Error cargando bitácora:', error);
+        console.error('❌ Detalles:', error.response?.data);
       } finally {
         setLoading(false);
       }
@@ -31,7 +35,8 @@ const Bitacora = () => {
     const grouped = {};
     
     logs.forEach(log => {
-      const date = new Date(log.timestamp).toLocaleDateString('es-ES');
+      // fechaHora viene de la API en camelCase
+      const date = new Date(log.fechaHora).toLocaleDateString('es-ES');
       if (!grouped[date]) {
         grouped[date] = [];
       }
@@ -47,20 +52,28 @@ const Bitacora = () => {
 
   const getActionIcon = (action) => {
     const icons = {
-      'Inicio de sesión': <LogIn size={20} color="#2563eb" />,
-      'Creó pedido': <Plus size={20} color="#10b981" />,
-      'Eliminó pedido': <Trash2 size={20} color="#dc2626" />,
-      'Creó usuario': <UserPlus size={20} color="#8b5cf6" />
+      'LOGIN': <LogIn size={20} color="#2563eb" />,
+      'CREAR_PEDIDO': <Plus size={20} color="#10b981" />,
+      'ACTUALIZAR_ESTADO': <Clock size={20} color="#f59e0b" />,
+      'ACTUALIZACION_PEDIDO': <Clock size={20} color="#f59e0b" />,
+      'ELIMINAR_PEDIDO': <Trash2 size={20} color="#dc2626" />,
+      'CREAR_USUARIO': <UserPlus size={20} color="#8b5cf6" />,
+      'CAMBIO_PASSWORD': <Clock size={20} color="#3b82f6" />,
+      'DESACTIVAR_USUARIO': <Trash2 size={20} color="#ef4444" />
     };
     return icons[action] || <Clock size={20} color="#64748b" />;
   };
 
   const getActionBadge = (action) => {
     const badges = {
-      'Inicio de sesión': 'login',
-      'Creó pedido': 'create',
-      'Eliminó pedido': 'delete',
-      'Creó usuario': 'user-create'
+      'LOGIN': 'login',
+      'CREAR_PEDIDO': 'create',
+      'ACTUALIZAR_ESTADO': 'update',
+      'ACTUALIZACION_PEDIDO': 'update',
+      'ELIMINAR_PEDIDO': 'delete',
+      'CREAR_USUARIO': 'user-create',
+      'CAMBIO_PASSWORD': 'update',
+      'DESACTIVAR_USUARIO': 'delete'
     };
     return badges[action] || 'default';
   };
@@ -110,21 +123,21 @@ const Bitacora = () => {
 
             <div className="logs-list">
               {dateGroup.logs.map((log, logIndex) => (
-                <div key={logIndex} className={`log-entry ${getActionBadge(log.action)}`}>
+                <div key={logIndex} className={`log-entry ${getActionBadge(log.accion)}`}>
                   <div className="log-icon">
-                    {getActionIcon(log.action)}
+                    {getActionIcon(log.accion)}
                   </div>
                   
                   <div className="log-content">
                     <div className="log-header-row">
-                      <h4 className="log-user">{log.userName}</h4>
-                      <span className="log-action-badge">{log.action}</span>
+                      <h4 className="log-user">{log.nombreUsuario || 'Sistema'}</h4>
+                      <span className="log-action-badge">{log.accion}</span>
                     </div>
                     
-                    <p className="log-details">{log.details}</p>
+                    <p className="log-details">{log.descripcion}</p>
                     
                     <p className="log-time">
-                      {new Date(log.timestamp).toLocaleTimeString('es-ES', {
+                      {new Date(log.fechaHora).toLocaleTimeString('es-ES', {
                         hour: '2-digit',
                         minute: '2-digit',
                         second: '2-digit'
