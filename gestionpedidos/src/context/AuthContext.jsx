@@ -3,6 +3,7 @@ import { authService } from '../services/api';
 
 const AuthContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -14,28 +15,60 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     // Inicializar el estado desde localStorage
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    return savedUser && token ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      if (savedUser && savedUser !== 'undefined' && token) {
+        return JSON.parse(savedUser);
+      }
+    } catch (error) {
+      console.error('Error al cargar usuario desde localStorage:', error);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
+    return null;
   });
   const [loading] = useState(false);
 
   const login = async (email, password) => {
     try {
+      console.log('🔐 Intentando login con:', email);
       const response = await authService.login(email, password);
-      const { token, user: userData } = response;
+      console.log('📥 Respuesta del servidor:', response);
       
+      const { token, idusuario, nombreCompleto, email: userEmail, rol, idRol } = response;
+      
+      if (!token) {
+        console.error('❌ Respuesta inválida - token faltante');
+        return { 
+          success: false, 
+          error: 'Respuesta del servidor inválida' 
+        };
+      }
+      
+      // Crear objeto de usuario con la estructura de la API
+      const userData = {
+        id: idusuario,
+        nombre: nombreCompleto,
+        email: userEmail,
+        rol: rol,
+        idRol: idRol
+      };
+      
+      console.log('✅ Login exitoso, guardando datos...');
       // Guardar en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       
       setUser(userData);
+      console.log('✅ Usuario actualizado, redirigiendo...');
       return { success: true };
     } catch (error) {
-      console.error('Error en login:', error);
+      console.error('❌ Error en login:', error);
+      console.error('❌ Detalles:', error.response?.data);
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Error al iniciar sesión' 
+        error: error.response?.data?.message || error.message || 'Error al iniciar sesión' 
       };
     }
   };
@@ -51,12 +84,12 @@ export function AuthProvider({ children }) {
     if (!user) return false;
     
     const permissions = {
-      'Administrador Principal': ['dashboard', 'pedidos', 'usuarios', 'bitacora', 'crear_usuario', 'eliminar_pedido', 'cambiar_password', 'desactivar_usuario'],
-      'Administrador 2': ['dashboard', 'pedidos', 'bitacora', 'eliminar_pedido'],
+      'AdminPrincipal': ['dashboard', 'pedidos', 'usuarios', 'bitacora', 'crear_usuario', 'eliminar_pedido', 'cambiar_password', 'desactivar_usuario'],
+      'AdminSecundario': ['dashboard', 'pedidos', 'bitacora', 'eliminar_pedido'],
       'Repartidor': ['pedidos', 'crear_pedido']
     };
     
-    return permissions[user.role]?.includes(permission) || false;
+    return permissions[user.rol]?.includes(permission) || false;
   };
 
   const value = {

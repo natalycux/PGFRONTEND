@@ -27,8 +27,8 @@ const MainLayout = () => {
         
         <div className="header-right">
           <div className="user-info">
-            <span className="user-role">{user?.role}</span>
-            <span className="user-name">{user?.name}</span>
+            <span className="user-role">{user?.rol}</span>
+            <span className="user-name">{user?.nombre}</span>
           </div>
           <button onClick={handleLogout} className="logout-button">
             <LogOut size={20} />

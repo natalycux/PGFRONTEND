@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configuración base de la API
-const API_BASE_URL = 'https://localhost:7004/api';
+const API_BASE_URL = 'https://localhost:7004';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -43,12 +43,12 @@ api.interceptors.response.use(
 // Servicios de Autenticación
 export const authService = {
   login: async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/api/Auth/login', { email, password });
     return response.data;
   },
   
   getCurrentUser: async () => {
-    const response = await api.get('/auth/me');
+    const response = await api.get('/api/Auth/validate');
     return response.data;
   }
 };
@@ -56,22 +56,22 @@ export const authService = {
 // Servicios de Dashboard
 export const dashboardService = {
   getStatistics: async () => {
-    const response = await api.get('/dashboard/statistics');
+    const response = await api.get('/api/Dashboard');
     return response.data;
   },
   
   getOrdersByCommunity: async () => {
-    const response = await api.get('/dashboard/orders-by-community');
+    const response = await api.get('/api/Dashboard/orders-by-community');
     return response.data;
   },
   
   getOrdersByDeliveryPerson: async () => {
-    const response = await api.get('/dashboard/orders-by-delivery-person');
+    const response = await api.get('/api/Dashboard/orders-by-delivery-person');
     return response.data;
   },
   
   getRecentOrders: async () => {
-    const response = await api.get('/dashboard/recent-orders');
+    const response = await api.get('/api/Dashboard/recent-orders');
     return response.data;
   }
 };
@@ -79,27 +79,27 @@ export const dashboardService = {
 // Servicios de Pedidos
 export const orderService = {
   getAll: async (filters = {}) => {
-    const response = await api.get('/orders', { params: filters });
+    const response = await api.get('/api/Pedidos', { params: filters });
     return response.data;
   },
   
   getById: async (id) => {
-    const response = await api.get(`/orders/${id}`);
+    const response = await api.get(`/api/Pedidos/${id}`);
     return response.data;
   },
   
   create: async (orderData) => {
-    const response = await api.post('/orders', orderData);
+    const response = await api.post('/api/Pedidos', orderData);
     return response.data;
   },
   
   updateStatus: async (id, status) => {
-    const response = await api.patch(`/orders/${id}/status`, { status });
+    const response = await api.put(`/api/Pedidos/${id}/estado`, { estado: status });
     return response.data;
   },
   
   delete: async (id) => {
-    const response = await api.delete(`/orders/${id}`);
+    const response = await api.delete(`/api/Pedidos/${id}`);
     return response.data;
   }
 };
@@ -107,15 +107,15 @@ export const orderService = {
 // Servicios de Comunidades
 export const communityService = {
   getAll: async () => {
-    const response = await api.get('/communities');
+    const response = await api.get('/api/Clientes/comunidades');
     return response.data;
   }
 };
 
 // Servicios de Clientes
 export const clientService = {
-  getByCommunity: async (communityId) => {
-    const response = await api.get(`/clients/by-community/${communityId}`);
+  getByCommunity: async (comunityId) => {
+    const response = await api.get(`/api/Clientes/comunidad/${comunityId}`);
     return response.data;
   }
 };
@@ -123,22 +123,25 @@ export const clientService = {
 // Servicios de Usuarios
 export const userService = {
   getAll: async () => {
-    const response = await api.get('/users');
+    const response = await api.get('/api/Usuarios');
     return response.data;
   },
   
   create: async (userData) => {
-    const response = await api.post('/users', userData);
+    const response = await api.post('/api/Usuarios', userData);
     return response.data;
   },
   
   changePassword: async (userId, newPassword) => {
-    const response = await api.patch(`/users/${userId}/password`, { password: newPassword });
+    const response = await api.post('/api/Auth/change-password', { 
+      usuarioId: userId, 
+      nuevaContrasena: newPassword 
+    });
     return response.data;
   },
   
   deactivate: async (userId) => {
-    const response = await api.patch(`/users/${userId}/deactivate`);
+    const response = await api.put(`/api/Usuarios/${userId}/desactivar`);
     return response.data;
   }
 };
@@ -146,12 +149,12 @@ export const userService = {
 // Servicios de Bitácora
 export const auditLogService = {
   getAll: async (filters = {}) => {
-    const response = await api.get('/audit-logs', { params: filters });
+    const response = await api.get('/api/Bitacora', { params: filters });
     return response.data;
   },
   
   getStatistics: async () => {
-    const response = await api.get('/audit-logs/statistics');
+    const response = await api.get('/api/Bitacora/agrupada');
     return response.data;
   }
 };

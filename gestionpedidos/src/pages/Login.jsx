@@ -42,8 +42,8 @@ const Login = () => {
 
         <div className="default-user-info">
           <p className="info-title">Usuario por defecto:</p>
-          <p className="info-text">Email: admin@agua.com</p>
-          <p className="info-text">Contraseña: admin123</p>
+          <p className="info-text">Email: admin1@pnj.local</p>
+          <p className="info-text">Contraseña: Admin26</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

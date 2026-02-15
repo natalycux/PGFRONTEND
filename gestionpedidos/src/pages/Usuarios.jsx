@@ -79,8 +79,8 @@ const Usuarios = () => {
 
   const getRoleBadge = (role) => {
     const badges = {
-      'Administrador Principal': { class: 'admin-principal', icon: <Shield size={14} />, text: 'Administrador Principal' },
-      'Administrador 2': { class: 'admin-2', icon: <Shield size={14} />, text: 'Administrador 2' },
+      'AdminPrincipal': { class: 'admin-principal', icon: <Shield size={14} />, text: 'Administrador Principal' },
+      'AdminSecundario': { class: 'admin-2', icon: <Shield size={14} />, text: 'Administrador 2' },
       'Repartidor': { class: 'repartidor', icon: '👤', text: 'Repartidor' }
     };
     const badge = badges[role] || { class: '', icon: '', text: role };
@@ -205,8 +205,8 @@ const Usuarios = () => {
                   required
                 >
                   <option value="Repartidor">Repartidor</option>
-                  <option value="Administrador 2">Administrador 2</option>
-                  <option value="Administrador Principal">Administrador Principal</option>
+                  <option value="AdminSecundario">Administrador 2</option>
+                  <option value="AdminPrincipal">Administrador Principal</option>
                 </select>
               </div>
 
