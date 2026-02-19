@@ -1,12 +1,22 @@
 /* ─── Layout principal ────────────────────────────────────────── */
 .pedidos-page { padding: 0; }
 
-.pedidos-layout {
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 24px;
-  align-items: start;
+/* ─── Botón Crear Pedido ─────────────────────────────── */
+.create-order-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
 }
+.create-order-btn:hover { background: #1d4ed8; }
 
 /* ─── Formulario Nuevo Pedido ─────────────────────────────────── */
 .pedidos-form-section {
@@ -72,6 +82,10 @@
 
 .input-with-suffix { position: relative; }
 .input-with-suffix input { width: 100%; padding-right: 40px; }
+/* Ocultar spinner nativo de inputs numéricos */
+.input-with-suffix input::-webkit-outer-spin-button,
+.input-with-suffix input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input-with-suffix input[type=number] { -moz-appearance: textfield; }
 .input-suffix {
   position: absolute;
   right: 12px;
@@ -411,6 +425,44 @@
   gap: 0;
 }
 
+/* Modal crear pedido — más ancho y con grid */
+.modal-card--create {
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-create-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.modal-create-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.modal-create-header .modal-title { margin: 0; }
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group--full {
+  grid-column: 1 / -1;
+}
+
 .modal-icon-wrap {
   width: 56px;
   height: 56px;
@@ -528,10 +580,71 @@
   color: #94a3b8;
 }
 
+/* ─── Precio en tarjeta de pedido ────────────────────────────── */
+.order-price-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 8px 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: #4b5563;
+}
+.price-row--discount {
+  color: #dc2626;
+}
+.price-row--total {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #1d4ed8;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 5px;
+  margin-top: 2px;
+}
+
+/* ─── Total del pedido ───────────────────────────────────────── */
+.order-total-box {
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.order-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #374151;
+}
+.order-total-discount {
+  color: #dc2626;
+}
+.order-total-final {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1d4ed8;
+  border-top: 1px solid #bfdbfe;
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .pedidos-layout { grid-template-columns: 1fr; }
-  .pedidos-form-section { position: static; }
   .detail-row { flex-direction: column; gap: 6px; }
   .order-item-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 600px) {
+  .modal-form-grid { grid-template-columns: 1fr; }
+  .modal-card--create { padding: 24px 16px 20px; }
 }
