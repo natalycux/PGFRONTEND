@@ -4,6 +4,7 @@ import MainLayout from './components/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Pedidos from './pages/Pedidos';
+import Comunidades from './pages/Comunidades';
 import Usuarios from './pages/Usuarios';
 import Bitacora from './pages/Bitacora';
 import './App.css';
@@ -63,6 +64,15 @@ function AppRoutes() {
               <Pedidos />
             </ProtectedRoute>
           } 
+        />
+
+        <Route
+          path="comunidades"
+          element={
+            <ProtectedRoute permission="comunidades">
+              <Comunidades />
+            </ProtectedRoute>
+          }
         />
         
         <Route 

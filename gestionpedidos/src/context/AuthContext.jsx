@@ -84,8 +84,8 @@ export function AuthProvider({ children }) {
     if (!user) return false;
     
     const permissions = {
-      'AdminPrincipal': ['dashboard', 'pedidos', 'usuarios', 'bitacora', 'crear_usuario', 'eliminar_pedido', 'cambiar_password', 'desactivar_usuario'],
-      'AdminSecundario': ['dashboard', 'pedidos', 'bitacora', 'eliminar_pedido'],
+      'AdminPrincipal': ['dashboard', 'pedidos', 'comunidades', 'clientes', 'usuarios', 'bitacora', 'crear_usuario', 'eliminar_pedido', 'cambiar_password', 'desactivar_usuario'],
+      'AdminSecundario': ['dashboard', 'pedidos', 'comunidades', 'clientes', 'bitacora', 'eliminar_pedido'],
       'Repartidor': ['pedidos', 'crear_pedido']
     };
     

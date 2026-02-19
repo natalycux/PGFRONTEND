@@ -48,6 +48,18 @@ const MainLayout = () => {
             Pedidos
           </NavLink>
         )}
+
+        {hasPermission('comunidades') && (
+          <NavLink to="/comunidades" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            Comunidades
+          </NavLink>
+        )}
+
+        {hasPermission('clientes') && (
+          <NavLink to="/clientes" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            Clientes
+          </NavLink>
+        )}
         
         {hasPermission('usuarios') && (
           <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
