@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/api';
 import { UserPlus, Key, UserX, Shield, X } from 'lucide-react';
@@ -22,12 +22,10 @@ const Usuarios = () => {
 
   const loadUsers = async () => {
     try {
-      console.log('🔄 Cargando usuarios...');
       const data = await userService.getAll();
-      console.log('👥 Usuarios recibidos:', data);
       setUsers(data);
     } catch (error) {
-      console.error('❌ Error cargando usuarios:', error);
+      console.error('Error cargando usuarios:', error);
     } finally {
       setLoading(false);
     }
@@ -35,7 +33,6 @@ const Usuarios = () => {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
-    
     try {
       await userService.create(newUser);
       await loadUsers();
@@ -49,15 +46,14 @@ const Usuarios = () => {
   };
 
   const handleChangePassword = async (userId) => {
-    const newPassword = prompt('Ingrese la nueva contraseña:');
+    const newPassword = prompt('Ingrese la nueva contrasena:');
     if (!newPassword) return;
-    
     try {
       await userService.changePassword(userId, newPassword);
-      alert('Contraseña cambiada exitosamente');
+      alert('Contrasena cambiada exitosamente');
     } catch (error) {
-      console.error('Error cambiando contraseña:', error);
-      alert('Error al cambiar la contraseña');
+      console.error('Error cambiando contrasena:', error);
+      alert('Error al cambiar la contrasena');
     }
   };
 
@@ -67,10 +63,10 @@ const Usuarios = () => {
       return;
     }
     if (!activo) {
-      alert('Este usuario ya está desactivado');
+      alert('Este usuario ya esta desactivado');
       return;
     }
-    if (window.confirm('¿Estás seguro de desactivar este usuario?')) {
+    if (window.confirm('Estas seguro de desactivar este usuario?')) {
       try {
         await userService.deactivate(userId);
         await loadUsers();
@@ -86,7 +82,7 @@ const Usuarios = () => {
     const badges = {
       'AdminPrincipal': { class: 'admin-principal', icon: <Shield size={14} />, text: 'Administrador Principal' },
       'AdminSecundario': { class: 'admin-2', icon: <Shield size={14} />, text: 'Administrador 2' },
-      'Repartidor': { class: 'repartidor', icon: '👤', text: 'Repartidor' }
+      'Repartidor': { class: 'repartidor', icon: '', text: 'Repartidor' }
     };
     const badge = badges[role] || { class: '', icon: '', text: role };
     return (
@@ -104,7 +100,7 @@ const Usuarios = () => {
     <div className="usuarios-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Gestión de Usuarios</h1>
+          <h1 className="page-title">Gestion de Usuarios</h1>
           <p className="page-subtitle">Administra usuarios del sistema</p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="create-user-button">
@@ -114,7 +110,7 @@ const Usuarios = () => {
       </div>
 
       <div className="users-count">
-        <h3>Usuarios Registrados ({users.length}) · Activos: {users.filter(u => u.activo !== false).length}</h3>
+        <h3>Usuarios Registrados ({users.length}) &middot; Activos: {users.filter(u => u.activo !== false).length}</h3>
       </div>
 
       <div className="users-list">
@@ -124,7 +120,7 @@ const Usuarios = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h3 className="user-name">{user.nombreCompleto}</h3>
                 {user.idUsuario === currentUser.id && (
-                  <span className="current-user-badge">Tú</span>
+                  <span className="current-user-badge">Tu</span>
                 )}
                 {user.activo === false && (
                   <span className="inactive-badge">Desactivado</span>
@@ -139,18 +135,18 @@ const Usuarios = () => {
             </div>
 
             <div className="user-actions">
-              <button 
+              <button
                 onClick={() => handleChangePassword(user.idUsuario)}
                 className={`action-button change-password${user.activo === false ? ' deactivate-disabled' : ''}`}
                 disabled={user.activo === false}
-                title={user.activo === false ? 'Usuario desactivado' : 'Cambiar contraseña'}
+                title={user.activo === false ? 'Usuario desactivado' : 'Cambiar contrasena'}
               >
                 <Key size={18} />
-                Cambiar Contraseña
+                Cambiar Contrasena
               </button>
-              
+
               {user.idUsuario !== currentUser.id && (
-                <button 
+                <button
                   onClick={() => handleDeactivate(user.idUsuario, user.activo)}
                   className={`action-button deactivate${user.activo === false ? ' deactivate-disabled' : ''}`}
                   disabled={user.activo === false}
@@ -180,7 +176,7 @@ const Usuarios = () => {
                 <label>Nombre Completo *</label>
                 <input
                   type="text"
-                  placeholder="Ej: Juan Pérez"
+                  placeholder="Ej: Juan Perez"
                   value={newUser.name}
                   onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                   required
@@ -199,7 +195,7 @@ const Usuarios = () => {
               </div>
 
               <div className="form-group">
-                <label>Contraseña *</label>
+                <label>Contrasena *</label>
                 <input
                   type="password"
                   placeholder="••••••••"

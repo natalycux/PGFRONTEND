@@ -104,6 +104,14 @@ export const orderService = {
   delete: async (id) => {
     const response = await api.delete(`/api/Pedidos/${id}`);
     return response.data;
+  },
+
+  cancelOrder: async (id, motivoCancelacion, idUsuarioEjecutor) => {
+    const response = await api.put(`/api/Pedidos/${id}/cancelar`, {
+      motivoCancelacion,
+      idUsuarioEjecutor
+    });
+    return response.data;
   }
 };
 
