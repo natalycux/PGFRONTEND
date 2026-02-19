@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Pedidos from './pages/Pedidos';
 import Comunidades from './pages/Comunidades';
+import Clientes from './pages/Clientes';
 import Usuarios from './pages/Usuarios';
 import Bitacora from './pages/Bitacora';
 import './App.css';
@@ -71,6 +72,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute permission="comunidades">
               <Comunidades />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="clientes"
+          element={
+            <ProtectedRoute permission="clientes">
+              <Clientes />
             </ProtectedRoute>
           }
         />

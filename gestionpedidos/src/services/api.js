@@ -140,8 +140,28 @@ export const communityService = {
 
 // Servicios de Clientes
 export const clientService = {
-  getByCommunity: async (comunityId) => {
-    const response = await api.get(`/api/Clientes/comunidad/${comunityId}`);
+  getAll: async () => {
+    const response = await api.get('/api/Clientes');
+    return response.data;
+  },
+
+  getByCommunity: async (communityId) => {
+    const response = await api.get(`/api/Clientes/comunidad/${communityId}`);
+    return response.data;
+  },
+
+  create: async (clientData) => {
+    const response = await api.post('/api/Clientes', clientData);
+    return response.data;
+  },
+
+  update: async (id, clientData) => {
+    const response = await api.put(`/api/Clientes/${id}`, clientData);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(`/api/Clientes/${id}`);
     return response.data;
   }
 };
