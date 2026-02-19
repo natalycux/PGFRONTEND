@@ -1,8 +1,165 @@
-.dashboard {
+﻿.dashboard {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px;
 }
+
+/* ── Tarjeta selector de período ── */
+.periodo-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.periodo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.periodo-icon { color: #2563eb; }
+
+.periodo-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.filtros-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filtro-btn:hover {
+  border-color: #93c5fd;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.filtro-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* ── Fila de calendarios ── */
+.calendario-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.fecha-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.fecha-grupo label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.fecha-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fecha-input-wrap input[type="date"] {
+  width: 100%;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  background: white;
+  outline: none;
+  cursor: pointer;
+}
+
+.fecha-input-wrap input[type="date"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.fecha-input-wrap svg {
+  position: absolute;
+  right: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.limpiar-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.limpiar-btn:hover { background: #f1f5f9; }
+
+.aplicar-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.aplicar-btn:hover { background: #1d4ed8; }
+
+/* ── Footer del período ── */
+.periodo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #64748b;
+  padding-top: 4px;
+}
+
+.periodo-footer strong { color: #1e293b; }
+
+.periodo-total {
+  font-weight: 600;
+  color: #2563eb;
+}
+
 
 .loading {
   text-align: center;
@@ -11,65 +168,69 @@
   font-size: 16px;
 }
 
+/* ── Filas de tarjetas ── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
 
+.stats-row-4 { grid-template-columns: repeat(4, 1fr); }
+.stats-row-3 { grid-template-columns: repeat(3, 1fr); }
+.stats-row-2 { grid-template-columns: repeat(2, 1fr); }
+
+/* ── Tarjeta individual ── */
 .stat-card {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  border: 1px solid #f1f5f9;
+  transition: box-shadow 0.2s;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
+/* ── Icono en circulo suave ── */
 .stat-icon {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  flex-shrink: 0;
 }
 
-.stat-card.blue .stat-icon { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-.stat-card.yellow .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.stat-card.orange .stat-icon { background: linear-gradient(135deg, #f97316, #ea580c); }
-.stat-card.green .stat-icon { background: linear-gradient(135deg, #10b981, #059669); }
-.stat-card.secondary .stat-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
-.stat-card.purple .stat-icon { background: linear-gradient(135deg, #a855f7, #9333ea); }
-.stat-card.teal .stat-icon { background: linear-gradient(135deg, #14b8a6, #0d9488); }
-.stat-card.info .stat-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.stat-card.calendar .stat-icon { background: linear-gradient(135deg, #ec4899, #db2777); }
+.stat-icon.blue   { background: #dbeafe; color: #2563eb; }
+.stat-icon.yellow { background: #fef3c7; color: #d97706; }
+.stat-icon.orange { background: #ffedd5; color: #ea580c; }
+.stat-icon.green  { background: #d1fae5; color: #059669; }
+.stat-icon.indigo { background: #e0e7ff; color: #4f46e5; }
+.stat-icon.purple { background: #f3e8ff; color: #9333ea; }
+.stat-icon.teal   { background: #ccfbf1; color: #0d9488; }
+.stat-icon.cyan   { background: #cffafe; color: #0891b2; }
+.stat-icon.pink   { background: #fce7f3; color: #db2777; }
 
-.stat-content {
-  flex: 1;
-}
+.stat-content { flex: 1; }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #64748b;
   margin: 0 0 4px 0;
   font-weight: 500;
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .stat-sublabel {
@@ -78,40 +239,43 @@
   margin: 4px 0 0 0;
 }
 
+/* ── Secciones ── */
 .dashboard-section {
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  border: 1px solid #f1f5f9;
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 20px 0;
 }
 
-.community-list,
-.delivery-list {
+/* ── Barras de comunidad / repartidor ── */
+.bar-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
-.community-item,
-.delivery-item {
+.bar-item {
   display: grid;
-  grid-template-columns: 150px 1fr auto;
+  grid-template-columns: 180px 1fr 40px;
   align-items: center;
   gap: 16px;
 }
 
-.community-name,
-.delivery-name {
+.bar-name {
   font-size: 14px;
   font-weight: 500;
   color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .progress-bar {
@@ -123,46 +287,46 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
   border-radius: 4px;
-  transition: width 0.3s ease;
+  transition: width 0.4s ease;
+  min-width: 4px;
 }
 
-.community-count,
-.delivery-count {
-  font-size: 14px;
+.bar-count {
+  font-size: 13px;
   font-weight: 600;
   color: #2563eb;
-  min-width: 30px;
   text-align: right;
 }
 
+/* ── Pedidos Recientes ── */
 .recent-orders {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
 .order-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: all 0.2s;
+  gap: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .order-card:hover {
-  border-color: #2563eb;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+  border-color: #93c5fd;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
 }
 
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: flex-start;
   gap: 8px;
 }
 
@@ -174,57 +338,39 @@
 }
 
 .order-community {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   background: #e2e8f0;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
+  white-space: nowrap;
 }
 
 .order-details {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .status-badge {
   font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
   font-weight: 500;
 }
-
-.status-badge.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status-badge.in-transit {
-  background: #fed7aa;
-  color: #9a3412;
-}
-
-.status-badge.delivered {
-  background: #d1fae5;
-  color: #065f46;
-}
+.status-badge.pending    { background: #fef3c7; color: #92400e; }
+.status-badge.in-transit { background: #fed7aa; color: #9a3412; }
+.status-badge.delivered  { background: #d1fae5; color: #065f46; }
+.status-badge.cancelled  { background: #fee2e2; color: #991b1b; }
 
 .transaction-badge {
   font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
   font-weight: 500;
 }
-
-.transaction-badge.donation {
-  background: #e9d5ff;
-  color: #6b21a8;
-}
-
-.transaction-badge.discount {
-  background: #ccfbf1;
-  color: #115e59;
-}
+.transaction-badge.donation { background: #f3e8ff; color: #6b21a8; }
+.transaction-badge.discount { background: #ccfbf1; color: #115e59; }
 
 .order-info {
   display: flex;
@@ -234,27 +380,39 @@
   color: #64748b;
 }
 
+.order-info span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .order-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
   padding-top: 8px;
   border-top: 1px solid #e2e8f0;
 }
 
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .stats-row-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .stats-row-4,
+  .stats-row-3,
+  .stats-row-2 { grid-template-columns: 1fr 1fr; }
+
+  .bar-item {
+    grid-template-columns: 110px 1fr 30px;
+    gap: 10px;
   }
 
-  .community-item,
-  .delivery-item {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
+  .recent-orders { grid-template-columns: 1fr; }
 
-  .recent-orders {
-    grid-template-columns: 1fr;
-  }
+  .calendario-row { flex-direction: column; }
+
+  .filtro-btn { font-size: 12px; padding: 5px 12px; }
 }

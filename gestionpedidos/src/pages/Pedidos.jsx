@@ -72,7 +72,22 @@ const Pedidos = () => {
     e.preventDefault();
     
     try {
-      await orderService.create(formData);
+      console.log('📝 Datos del formulario:', formData);
+      
+      // Transformar los datos al formato que espera la API
+      const orderData = {
+        idCliente: parseInt(formData.clientId),
+        tipoTransaccion: formData.transactionType,
+        cantidadGarrafones: parseInt(formData.bottles),
+        montoDescuento: parseFloat(formData.discount) || 0,
+        notasAdicionales: formData.notes || ''
+      };
+      
+      console.log('📤 Enviando pedido:', orderData);
+      
+      const response = await orderService.create(orderData);
+      console.log('✅ Pedido creado:', response);
+      
       await loadInitialData();
       
       // Reset form
@@ -89,18 +104,23 @@ const Pedidos = () => {
       
       alert('Pedido creado exitosamente');
     } catch (error) {
-      console.error('Error creando pedido:', error);
-      alert('Error al crear el pedido');
+      console.error('❌ Error creando pedido:', error);
+      console.error('❌ Respuesta del servidor:', error.response?.data);
+      alert('Error al crear el pedido: ' + (error.response?.data?.message || error.message));
     }
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
+      console.log('🔄 Actualizando estado del pedido:', orderId, 'a', newStatus);
       await orderService.updateStatus(orderId, newStatus);
-      await loadInitialData();
+      console.log('✅ Estado actualizado correctamente');
     } catch (error) {
-      console.error('Error actualizando estado:', error);
-      alert('Error al actualizar el estado');
+      // Si es error 400/500 pero el backend igual actualizó, recargar de todas formas
+      console.warn('⚠️ Error en respuesta:', error.response?.status, error.response?.data);
+    } finally {
+      // Siempre recargar la lista para reflejar el estado real de la BD
+      await loadInitialData();
     }
   };
 
@@ -123,7 +143,7 @@ const Pedidos = () => {
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'Todos') return true;
-    return order.status === filter;
+    return order.estadoPedido === filter;
   });
 
   const getStatusBadge = (status) => {
@@ -280,59 +300,59 @@ const Pedidos = () => {
               className={filter === 'Pendiente' ? 'filter-tab active' : 'filter-tab'}
               onClick={() => setFilter('Pendiente')}
             >
-              Pendientes ({orders.filter(o => o.status === 'Pendiente').length})
+              Pendientes ({orders.filter(o => o.estadoPedido === 'Pendiente').length})
             </button>
             <button 
               className={filter === 'En Camino' ? 'filter-tab active' : 'filter-tab'}
               onClick={() => setFilter('En Camino')}
             >
-              En Camino ({orders.filter(o => o.status === 'En Camino').length})
+              En Camino ({orders.filter(o => o.estadoPedido === 'En Camino').length})
             </button>
             <button 
               className={filter === 'Entregado' ? 'filter-tab active' : 'filter-tab'}
               onClick={() => setFilter('Entregado')}
             >
-              Entregados ({orders.filter(o => o.status === 'Entregado').length})
+              Entregados ({orders.filter(o => o.estadoPedido === 'Entregado').length})
             </button>
           </div>
 
           <div className="orders-list">
             {filteredOrders.map(order => (
-              <div key={order.id} className="order-item">
+              <div key={order.idPedido} className="order-item">
                 <div className="order-item-header">
                   <div>
-                    <h3 className="order-client-name">{order.clientName}</h3>
-                    <span className="order-community-tag">{order.communityName}</span>
+                    <h3 className="order-client-name">{order.nombreCliente}</h3>
+                    <span className="order-community-tag">{order.nombreComunidad}</span>
                   </div>
                   <div className="order-badges">
-                    {getStatusBadge(order.status)}
-                    {getTransactionBadge(order.transactionType, order.discount)}
+                    {getStatusBadge(order.estadoPedido)}
+                    {getTransactionBadge(order.tipoTransaccion, order.montoDescuento)}
                   </div>
                 </div>
 
                 <div className="order-item-details">
                   <div className="detail-item">
                     <MapPin size={16} />
-                    <span>{order.address}</span>
+                    <span>{order.direccionDetallada || 'Sin dirección'}</span>
                   </div>
                   <div className="detail-item">
                     <Phone size={16} />
-                    <span>{order.phone}</span>
+                    <span>{order.telefono || 'Sin teléfono'}</span>
                   </div>
                   <div className="detail-item">
                     <Droplets size={16} />
-                    <span>{order.bottles} garrafones</span>
+                    <span>{order.cantidadGarrafones} garrafones</span>
                   </div>
                   <div className="detail-item">
                     <Calendar size={16} />
-                    <span>{new Date(order.date).toLocaleDateString('es-ES')}</span>
+                    <span>{new Date(order.fechaCreacion).toLocaleDateString('es-ES')}</span>
                   </div>
                 </div>
 
                 <div className="order-item-actions">
                   <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    value={order.estadoPedido}
+                    onChange={(e) => handleStatusChange(order.idPedido, e.target.value)}
                     className="status-select"
                   >
                     <option value="Pendiente">Pendiente</option>
@@ -342,7 +362,7 @@ const Pedidos = () => {
                   
                   {hasPermission('eliminar_pedido') && (
                     <button 
-                      onClick={() => handleDelete(order.id)}
+                      onClick={() => handleDelete(order.idPedido)}
                       className="delete-button"
                       title="Eliminar pedido"
                     >

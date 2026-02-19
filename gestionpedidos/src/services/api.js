@@ -55,8 +55,11 @@ export const authService = {
 
 // Servicios de Dashboard
 export const dashboardService = {
-  getStatistics: async () => {
-    const response = await api.get('/api/Dashboard');
+  getStatistics: async (fechaDesde = null, fechaHasta = null) => {
+    const params = {};
+    if (fechaDesde) params.fechaDesde = fechaDesde;
+    if (fechaHasta) params.fechaHasta = fechaHasta;
+    const response = await api.get('/api/Dashboard', { params });
     return response.data;
   },
   
@@ -94,7 +97,7 @@ export const orderService = {
   },
   
   updateStatus: async (id, status) => {
-    const response = await api.put(`/api/Pedidos/${id}/estado`, { estado: status });
+    const response = await api.put(`/api/Pedidos/${id}/estado`, { nuevoEstado: status });
     return response.data;
   },
   

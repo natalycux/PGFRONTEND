@@ -22,10 +22,12 @@ const Usuarios = () => {
 
   const loadUsers = async () => {
     try {
+      console.log('🔄 Cargando usuarios...');
       const data = await userService.getAll();
+      console.log('👥 Usuarios recibidos:', data);
       setUsers(data);
     } catch (error) {
-      console.error('Error cargando usuarios:', error);
+      console.error('❌ Error cargando usuarios:', error);
     } finally {
       setLoading(false);
     }
@@ -59,12 +61,15 @@ const Usuarios = () => {
     }
   };
 
-  const handleDeactivate = async (userId) => {
+  const handleDeactivate = async (userId, activo) => {
     if (userId === currentUser.id) {
       alert('No puedes desactivar tu propia cuenta');
       return;
     }
-    
+    if (!activo) {
+      alert('Este usuario ya está desactivado');
+      return;
+    }
     if (window.confirm('¿Estás seguro de desactivar este usuario?')) {
       try {
         await userService.deactivate(userId);
@@ -109,43 +114,50 @@ const Usuarios = () => {
       </div>
 
       <div className="users-count">
-        <h3>Usuarios Registrados ({users.length})</h3>
+        <h3>Usuarios Registrados ({users.length}) · Activos: {users.filter(u => u.activo !== false).length}</h3>
       </div>
 
       <div className="users-list">
         {users.map((user) => (
-          <div key={user.id} className="user-card">
+          <div key={user.idUsuario} className={`user-card${user.activo === false ? ' user-card-inactive' : ''}`}>
             <div className="user-card-header">
-              <div>
-                <h3 className="user-name">{user.name}</h3>
-                {user.id === currentUser.id && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h3 className="user-name">{user.nombreCompleto}</h3>
+                {user.idUsuario === currentUser.id && (
                   <span className="current-user-badge">Tú</span>
                 )}
+                {user.activo === false && (
+                  <span className="inactive-badge">Desactivado</span>
+                )}
               </div>
-              {getRoleBadge(user.role)}
+              {getRoleBadge(user.rol)}
             </div>
 
             <div className="user-info">
               <p className="user-email">{user.email}</p>
-              <p className="user-created">Creado: {new Date(user.createdAt).toLocaleDateString('es-ES')}</p>
+              <p className="user-created">Creado: {new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</p>
             </div>
 
             <div className="user-actions">
               <button 
-                onClick={() => handleChangePassword(user.id)}
-                className="action-button change-password"
+                onClick={() => handleChangePassword(user.idUsuario)}
+                className={`action-button change-password${user.activo === false ? ' deactivate-disabled' : ''}`}
+                disabled={user.activo === false}
+                title={user.activo === false ? 'Usuario desactivado' : 'Cambiar contraseña'}
               >
                 <Key size={18} />
                 Cambiar Contraseña
               </button>
               
-              {user.id !== currentUser.id && (
+              {user.idUsuario !== currentUser.id && (
                 <button 
-                  onClick={() => handleDeactivate(user.id)}
-                  className="action-button deactivate"
+                  onClick={() => handleDeactivate(user.idUsuario, user.activo)}
+                  className={`action-button deactivate${user.activo === false ? ' deactivate-disabled' : ''}`}
+                  disabled={user.activo === false}
+                  title={user.activo === false ? 'Usuario ya desactivado' : 'Desactivar usuario'}
                 >
                   <UserX size={18} />
-                  Desactivar
+                  {user.activo === false ? 'Desactivado' : 'Desactivar'}
                 </button>
               )}
             </div>
