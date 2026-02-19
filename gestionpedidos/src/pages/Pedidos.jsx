@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   orderService, 
@@ -175,8 +175,8 @@ const Pedidos = () => {
   };
 
   const getTransactionBadge = (type, discount) => {
-    if (type === 'DonaciÃ³n') {
-      return <span className="order-badge badge-donation">ðŸŽ DonaciÃ³n</span>;
+    if (type === 'Donación') {
+      return <span className="order-badge badge-donation">🎁 Donación</span>;
     } else if (type === 'Descuento') {
       return <span className="order-badge badge-discount">% Descuento {discount > 0 ? `${discount}%` : ''}</span>;
     } else if (type === 'Venta') {
@@ -235,7 +235,7 @@ const Pedidos = () => {
               </select>
             </div>
             <div className="form-group">
-              <label>Tipo de TransacciÃ³n *</label>
+              <label>Tipo de Transacción *</label>
               <select
                 value={formData.transactionType}
                 onChange={(e) => setFormData({
@@ -246,7 +246,7 @@ const Pedidos = () => {
                 required
               >
                 <option value="Venta">Venta</option>
-                <option value="DonaciÃ³n">DonaciÃ³n</option>
+                <option value="Donación">Donación</option>
                 <option value="Descuento">Descuento</option>
               </select>
             </div>
@@ -342,7 +342,7 @@ const Pedidos = () => {
                       <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>
                         {order.nombreCliente}
                       </h3>
-                      {isCancelled && <span className="cancelled-icon" title="Cancelado">ðŸš«</span>}
+                      {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
                     </div>
                     <div className="order-badges">
                       {getStatusBadge(order.estadoPedido)}
@@ -354,11 +354,11 @@ const Pedidos = () => {
                   <div className="order-item-details">
                     <div className="detail-item">
                       <MapPin size={14} />
-                      <span>{order.direccionDetallada || 'Sin direcciÃ³n'}</span>
+                      <span>{order.direccionDetallada || 'Sin dirección'}</span>
                     </div>
                     <div className="detail-item">
                       <Phone size={14} />
-                      <span>{order.telefono || 'Sin telÃ©fono'}</span>
+                      <span>{order.telefono || 'Sin teléfono'}</span>
                     </div>
                     <div className="detail-row">
                       <div className="detail-item">
@@ -372,12 +372,12 @@ const Pedidos = () => {
                     </div>
                   </div>
 
-                  {/* Info de cancelaciÃ³n */}
+                  {/* Info de cancelación */}
                   {isCancelled && cancelInfo && (
                     <div className="cancellation-info">
                       <div className="cancellation-info-header">
                         <AlertCircle size={15} />
-                        <span className="cancellation-info-title">Motivo de cancelaciÃ³n:</span>
+                        <span className="cancellation-info-title">Motivo de cancelación:</span>
                       </div>
                       <p className="cancellation-reason">{cancelInfo.reason}</p>
                       {(cancelInfo.cancelledBy || cancelInfo.dateStr) && (
@@ -398,7 +398,7 @@ const Pedidos = () => {
                     </p>
                   )}
 
-                  {/* Acciones (solo si no estÃ¡ cancelado) */}
+                  {/* Acciones (solo si no está cancelado) */}
                   {!isCancelled && (
                     <div className="order-item-actions">
                       {/* Dropdown Cambiar Estado */}
@@ -425,7 +425,7 @@ const Pedidos = () => {
                         )}
                       </div>
 
-                      {/* BotÃ³n cancelar */}
+                      {/* Botón cancelar */}
                       <button
                         className="cancel-order-btn"
                         onClick={() => openCancelModal(order)}
@@ -457,16 +457,16 @@ const Pedidos = () => {
             </div>
             <h3 className="modal-title">Cancelar Pedido</h3>
             <p className="modal-description">
-              Â¿EstÃ¡s seguro de cancelar el pedido de{' '}
-              <strong>{cancelModal.order?.nombreCliente}</strong>? Esta acciÃ³n no se puede deshacer.
+              Â¿Estás seguro de cancelar el pedido de{' '}
+              <strong>{cancelModal.order?.nombreCliente}</strong>? Esta acción no se puede deshacer.
             </p>
 
             <label className="modal-label">
-              Motivo de cancelaciÃ³n <span className="required">*</span>
+              Motivo de cancelación <span className="required">*</span>
             </label>
             <textarea
               className={`modal-textarea${cancelReasonError ? ' modal-textarea--error' : ''}`}
-              placeholder="Explica por quÃ© se cancela este pedido..."
+              placeholder="Explica por qué se cancela este pedido..."
               value={cancelReason}
               onChange={(e) => {
                 setCancelReason(e.target.value);
@@ -475,7 +475,7 @@ const Pedidos = () => {
               rows={4}
             />
             {cancelReasonError && (
-              <p className="modal-error-text">El motivo de cancelaciÃ³n es obligatorio.</p>
+              <p className="modal-error-text">El motivo de cancelación es obligatorio.</p>
             )}
 
             <div className="modal-actions">
@@ -484,7 +484,7 @@ const Pedidos = () => {
                 onClick={handleConfirmCancel}
                 disabled={cancelLoading}
               >
-                {cancelLoading ? 'Cancelando...' : 'Confirmar CancelaciÃ³n'}
+                {cancelLoading ? 'Cancelando...' : 'Confirmar Cancelación'}
               </button>
               <button className="modal-back-btn" onClick={closeCancelModal} disabled={cancelLoading}>
                 Volver
