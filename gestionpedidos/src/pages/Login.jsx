@@ -40,47 +40,49 @@ const Login = () => {
           <p className="login-subtitle">Iniciar Sesión</p>
         </div>
 
-        <div className="default-user-info">
-          <p className="info-title">Usuario por defecto:</p>
-          <p className="info-text">Email: admin1@pnj.local</p>
-          <p className="info-text">Contraseña: Admin26</p>
+        <div className="login-body">
+          <div className="default-user-info">
+            <p className="info-title">Usuario por defecto:</p>
+            <p className="info-text">Email: admin1@pnj.local</p>
+            <p className="info-text">Contraseña: Admin26</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label>Correo Electrónico</label>
+              <div className="input-with-icon">
+                <Mail size={20} className="input-icon" />
+                <input
+                  type="email"
+                  placeholder="usuario@ejemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Contraseña</label>
+              <div className="input-with-icon">
+                <Lock size={20} className="input-icon" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </button>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label>Correo Electrónico</label>
-            <div className="input-with-icon">
-              <Mail size={20} className="input-icon" />
-              <input
-                type="email"
-                placeholder="usuario@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Contraseña</label>
-            <div className="input-with-icon">
-              <Lock size={20} className="input-icon" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-          </button>
-        </form>
       </div>
     </div>
   );

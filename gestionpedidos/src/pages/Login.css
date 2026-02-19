@@ -10,22 +10,23 @@
 .login-card {
   background: white;
   border-radius: 16px;
-  padding: 40px;
   width: 100%;
   max-width: 420px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 .login-header {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   text-align: center;
-  margin-bottom: 30px;
+  padding: 40px 40px 36px;
 }
 
 .logo-circle {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,15 +35,19 @@
 
 .login-header h1 {
   font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0 0 8px 0;
 }
 
 .login-subtitle {
   font-size: 16px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
+}
+
+.login-body {
+  padding: 32px 40px 40px;
 }
 
 .default-user-info {
@@ -85,31 +90,53 @@
 }
 
 .input-with-icon {
-  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 14px;
+  background: #f8fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  gap: 10px;
+  height: 48px;
+}
+
+.input-with-icon:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #ffffff;
+}
+
+.input-icon {
+  color: #94a3b8;
+  pointer-events: none;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
-  position: absolute;
-  left: 14px;
-  color: #94a3b8;
-  pointer-events: none;
-}
-
 .input-with-icon input {
-  width: 100%;
-  padding: 12px 12px 12px 44px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  flex: 1;
+  height: 100%;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   font-size: 14px;
-  transition: all 0.2s;
+  background: transparent !important;
+  color: #1e293b;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
 }
 
-.input-with-icon input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.input-with-icon input:-webkit-autofill,
+.input-with-icon input:-webkit-autofill:hover,
+.input-with-icon input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset !important;
+  box-shadow: 0 0 0px 1000px #f8fafc inset !important;
+  border: none !important;
 }
 
 .input-with-icon input::placeholder {
@@ -137,6 +164,7 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 8px;
+  width: 100%;
 }
 
 .login-button:hover:not(:disabled) {
