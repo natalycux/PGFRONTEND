@@ -2,6 +2,270 @@
   max-width: 1200px;
 }
 
+/* ── Filtro por fecha ──────────────────────────────────────────────────────── */
+.filter-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  margin-bottom: 24px;
+}
+
+.filter-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.date-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.date-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.date-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: visible;
+  background: white;
+  transition: border-color .2s;
+}
+
+.date-input-wrap:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+
+.date-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: transparent;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.date-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-btns {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-bottom: 1px;
+}
+
+.btn-ver-todo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+
+.btn-ver-todo:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-hoy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+
+.btn-hoy:hover {
+  background: #1d4ed8;
+}
+
+.filter-info {
+  font-size: 13px;
+  color: #64748b;
+  margin: 12px 0 0 0;
+}
+
+.filter-tag {
+  color: #2563eb;
+}
+
+/* ── Calendario popup ─────────────────────────────────────────────────────── */
+.cal-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.15);
+  padding: 16px;
+  width: 280px;
+  user-select: none;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-month-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cal-nav {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #475569;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background .15s;
+}
+
+.cal-nav:hover {
+  background: #f1f5f9;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.cal-day-name {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 4px 0;
+}
+
+.cal-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.cal-day:hover:not(.cal-empty):not(.cal-selected) {
+  background: #f1f5f9;
+}
+
+.cal-day.cal-selected {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+
+.cal-day.cal-today {
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.cal-day.cal-empty {
+  cursor: default;
+}
+
+.cal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cal-btn-today,
+.cal-btn-clear {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.cal-btn-today {
+  background: #eff6ff;
+  color: #2563eb;
+  border: none;
+}
+
+.cal-btn-today:hover {
+  background: #dbeafe;
+}
+
+.cal-btn-clear {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+}
+
+.cal-btn-clear:hover {
+  background: #e2e8f0;
+}
+
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
