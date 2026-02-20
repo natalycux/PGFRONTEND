@@ -197,6 +197,26 @@
   background: #fee2e2;
 }
 
+.action-button.reactivate {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.action-button.reactivate:hover {
+  background: #dcfce7;
+}
+
+.action-button.edit {
+  background: #fefce8;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.action-button.edit:hover {
+  background: #fef9c3;
+}
+
 .action-button.deactivate-disabled {
   background: #f1f5f9 !important;
   border-color: #e2e8f0 !important;
@@ -335,4 +355,32 @@
   padding: 60px;
   color: #64748b;
   font-size: 16px;
+}
+
+.input-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-password-wrapper input {
+  width: 100%;
+  padding-right: 40px !important;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: #1e293b;
 }

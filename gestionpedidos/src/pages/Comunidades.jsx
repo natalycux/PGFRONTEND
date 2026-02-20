@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { communityService } from '../services/api';
-import { Building2, Plus, X, Save, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import { communityService, userService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { Building2, Plus, X, Save, Pencil, XCircle, CheckCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 import './Comunidades.css';
 
 const Comunidades = () => {
+  const { user } = useAuth();
   const [communities, setCommunities] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
@@ -20,9 +24,8 @@ const Comunidades = () => {
   const [editError, setEditError] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
-  // Eliminar – confirm inline
-  const [deletingId, setDeletingId] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  // Toggle estado (desactivar / activar)
+  const [toggleLoading, setToggleLoading] = useState(false);
 
   useEffect(() => {
     load();
@@ -35,13 +38,26 @@ const Comunidades = () => {
 
   const load = async () => {
     try {
-      const data = await communityService.getAll();
-      setCommunities(data);
+      const [commData, usersData] = await Promise.all([
+        communityService.getAll(),
+        userService.getAll()
+      ]);
+      setCommunities(commData);
+      setUsers(usersData);
     } catch (err) {
       console.error('Error cargando comunidades:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getUserName = (id) => {
+    if (!id) return '—';
+    const u = users.find(u =>
+      (u.idUsuario ?? u.id ?? u.idusuario) === id ||
+      String(u.idUsuario ?? u.id ?? u.idusuario) === String(id)
+    );
+    return u ? (u.nombreCompleto ?? u.nombre ?? u.name ?? `Usuario ${id}`) : `Usuario ${id}`;
   };
 
   // ── Crear ──────────────────────────────────────────────────────
@@ -50,7 +66,6 @@ const Comunidades = () => {
     setNewName('');
     setCreateError('');
     setEditingId(null);
-    setDeletingId(null);
   };
 
   const closeForm = () => {
@@ -64,11 +79,44 @@ const Comunidades = () => {
     if (!newName.trim()) { setCreateError('El nombre es obligatorio.'); return; }
     setCreateLoading(true);
     try {
-      await communityService.create(newName.trim());
+      await communityService.create(newName.trim(), user?.id);
       await load();
       closeForm();
+      Swal.fire({
+        icon: 'success',
+        title: '¡Comunidad creada!',
+        text: `"${newName.trim()}" fue registrada exitosamente.`,
+        confirmButtonColor: '#2563eb',
+        timer: 2500,
+        timerProgressBar: true
+      });
     } catch (err) {
-      setCreateError(err.response?.data?.message || 'Error al crear la comunidad.');
+      try {
+        const data = await communityService.getAll();
+        const wasCreated = data.some(
+          (c) => c.nombreComunidad?.toLowerCase() === newName.trim().toLowerCase()
+        );
+        if (wasCreated) {
+          setCommunities(data);
+          closeForm();
+          Swal.fire({
+            icon: 'success',
+            title: '¡Comunidad creada!',
+            text: `"${newName.trim()}" fue registrada exitosamente.`,
+            confirmButtonColor: '#2563eb',
+            timer: 2500,
+            timerProgressBar: true
+          });
+          return;
+        }
+      } catch (_) { /* mostrar error original */ }
+
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.title ||
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        'Error al crear la comunidad.';
+      setCreateError(msg);
     } finally {
       setCreateLoading(false);
     }
@@ -79,7 +127,6 @@ const Comunidades = () => {
     setEditingId(community.idComunidad);
     setEditName(community.nombreComunidad);
     setEditError('');
-    setDeletingId(null);
     setShowForm(false);
   };
 
@@ -89,37 +136,62 @@ const Comunidades = () => {
     if (!editName.trim()) { setEditError('El nombre es obligatorio.'); return; }
     setEditLoading(true);
     try {
-      await communityService.update(id, editName.trim());
+      await communityService.update(id, editName.trim(), user?.id);
       await load();
       cancelEdit();
     } catch (err) {
-      setEditError(err.response?.data?.message || 'Error al actualizar.');
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.title ||
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        'Error al actualizar.';
+      setEditError(msg);
     } finally {
       setEditLoading(false);
     }
   };
 
-  // ── Eliminar ───────────────────────────────────────────────────
-  const startDelete = (id) => {
-    setDeletingId(id);
-    setEditingId(null);
-    setShowForm(false);
-  };
+  // ── Toggle estado ──────────────────────────────────────────────
+  const handleToggle = async (community) => {
+    const nuevaActiva = !community.activa;
+    const accion = nuevaActiva ? 'activar' : 'desactivar';
+    const accionPasado = nuevaActiva ? 'activada' : 'desactivada';
 
-  const cancelDelete = () => setDeletingId(null);
+    const result = await Swal.fire({
+      title: `¿${nuevaActiva ? 'Activar' : 'Desactivar'} comunidad?`,
+      text: `"${community.nombreComunidad}" será ${accionPasado}.`,
+      icon: nuevaActiva ? 'question' : 'warning',
+      showCancelButton: true,
+      confirmButtonColor: nuevaActiva ? '#16a34a' : '#e11d48',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar'
+    });
 
-  const handleDelete = async (id) => {
-    setDeleteLoading(true);
+    if (!result.isConfirmed) return;
+
+    setToggleLoading(true);
     try {
-      await communityService.delete(id);
+      await communityService.toggleEstado(community.idComunidad, nuevaActiva);
       await load();
-      setDeletingId(null);
+      Swal.fire({
+        icon: 'success',
+        title: nuevaActiva ? '¡Comunidad activada!' : '¡Comunidad desactivada!',
+        text: `"${community.nombreComunidad}" fue ${accionPasado} exitosamente.`,
+        confirmButtonColor: '#2563eb',
+        timer: 2000,
+        timerProgressBar: true
+      });
     } catch (err) {
-      console.error('Error eliminando comunidad:', err);
+      console.error('Error cambiando estado de comunidad:', err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.', confirmButtonColor: '#2563eb' });
     } finally {
-      setDeleteLoading(false);
+      setToggleLoading(false);
     }
   };
+
+  const activeCount   = communities.filter(c => c.activa).length;
+  const inactiveCount = communities.filter(c => !c.activa).length;
 
   if (loading) return <div className="loading">Cargando comunidades...</div>;
 
@@ -145,7 +217,7 @@ const Comunidades = () => {
         )}
       </div>
 
-      {/* ── Stat card ── */}
+      {/* ── Stat cards ── */}
       <div className="com-stats-row">
         <div className="com-stat-card">
           <div className="com-stat-icon">
@@ -154,6 +226,24 @@ const Comunidades = () => {
           <div>
             <p className="com-stat-label">Total Comunidades</p>
             <p className="com-stat-value">{communities.length}</p>
+          </div>
+        </div>
+        <div className="com-stat-card">
+          <div className="com-stat-icon com-stat-icon--green">
+            <CheckCircle size={22} />
+          </div>
+          <div>
+            <p className="com-stat-label">Activas</p>
+            <p className="com-stat-value">{activeCount}</p>
+          </div>
+        </div>
+        <div className="com-stat-card">
+          <div className="com-stat-icon com-stat-icon--gray">
+            <XCircle size={22} />
+          </div>
+          <div>
+            <p className="com-stat-label">Inactivas</p>
+            <p className="com-stat-value">{inactiveCount}</p>
           </div>
         </div>
       </div>
@@ -209,14 +299,18 @@ const Comunidades = () => {
               <div key={c.idComunidad}>
                 {/* Fila normal */}
                 {editingId !== c.idComunidad && (
-                  <div className={`com-table-row${deletingId === c.idComunidad ? ' com-row--deleting' : ''}`}>
+                  <div className={`com-table-row${!c.activa ? ' com-row--inactive' : ''}`}>
                     <div className="com-cell-name">
-                      <div className="com-community-icon">
+                      <div className={`com-community-icon${!c.activa ? ' com-community-icon--inactive' : ''}`}>
                         <Building2 size={17} />
                       </div>
                       <span className="com-community-name">{c.nombreComunidad}</span>
+                      {c.activa
+                        ? <span className="com-badge com-badge--active">Activa</span>
+                        : <span className="com-badge com-badge--inactive">Inactiva</span>
+                      }
                     </div>
-                    <span className="com-cell">{c.creadoPor || c.nombreCreador || '—'}</span>
+                    <span className="com-cell">{c.creadoPor || c.nombreCreador || getUserName(c.idUsuarioCreador ?? c.id_usuario_creador)}</span>
                     <span className="com-cell">
                       {c.fechaCreacion
                         ? new Date(c.fechaCreacion).toLocaleDateString('es-MX', {
@@ -225,38 +319,31 @@ const Comunidades = () => {
                         : '—'}
                     </span>
                     <div className="com-cell-actions">
-                      {deletingId !== c.idComunidad ? (
-                        <>
-                          <button
-                            className="com-icon-btn com-icon-edit"
-                            title="Editar"
-                            onClick={() => startEdit(c)}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className="com-icon-btn com-icon-delete"
-                            title="Eliminar"
-                            onClick={() => startDelete(c.idComunidad)}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </>
+                      {c.activa && (
+                        <button
+                          className="com-icon-btn com-icon-edit"
+                          title="Editar"
+                          onClick={() => startEdit(c)}
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      )}
+                      {c.activa ? (
+                        <button
+                          className="com-icon-btn com-icon-delete"
+                          title="Desactivar comunidad"
+                          onClick={() => handleToggle(c)}
+                        >
+                          <XCircle size={16} />
+                        </button>
                       ) : (
-                        <div className="com-confirm-delete">
-                          <AlertCircle size={15} />
-                          <span>¿Eliminar?</span>
-                          <button
-                            className="com-confirm-yes"
-                            onClick={() => handleDelete(c.idComunidad)}
-                            disabled={deleteLoading}
-                          >
-                            {deleteLoading ? '...' : 'Sí'}
-                          </button>
-                          <button className="com-confirm-no" onClick={cancelDelete} disabled={deleteLoading}>
-                            No
-                          </button>
-                        </div>
+                        <button
+                          className="com-icon-btn com-icon-activate"
+                          title="Activar comunidad"
+                          onClick={() => handleToggle(c)}
+                        >
+                          <CheckCircle size={16} />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -274,7 +361,7 @@ const Comunidades = () => {
                       />
                       {editError && <p className="com-field-error">{editError}</p>}
                     </div>
-                    <span className="com-cell">{c.creadoPor || c.nombreCreador || '—'}</span>
+                    <span className="com-cell">{c.creadoPor || c.nombreCreador || getUserName(c.idUsuarioCreador ?? c.id_usuario_creador)}</span>
                     <span className="com-cell">
                       {c.fechaCreacion
                         ? new Date(c.fechaCreacion).toLocaleDateString('es-MX', {

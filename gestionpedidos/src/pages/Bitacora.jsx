@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { auditLogService } from '../services/api';
-import { LogIn, Plus, Trash2, UserPlus, Clock, Calendar, X } from 'lucide-react';
+import { auditLogService, clientService } from '../services/api';
+import { LogIn, Plus, Trash2, UserPlus, UserCheck, Users, Clock, Calendar, X, RefreshCw, KeyRound, ToggleRight, Pencil, Ban } from 'lucide-react';
 import './Bitacora.css';
 
 // ── Calendario popup ─────────────────────────────────────────────────────────
@@ -90,6 +90,7 @@ const CalendarPicker = ({ selectedDate, onChange, onClose }) => {
 const Bitacora = () => {
   const [rawLogs, setRawLogs] = useState([]);
   const [totalLogs, setTotalLogs] = useState(0);
+  const [clientsMap, setClientsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate]     = useState(null);
@@ -111,9 +112,20 @@ const Bitacora = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const logsData = await auditLogService.getAll();
+        const [logsData, clientsData] = await Promise.all([
+          auditLogService.getAll(),
+          clientService.getAll().catch(() => [])
+        ]);
         setRawLogs(logsData);
         setTotalLogs(logsData.length);
+        // Construir mapa id → nombre para reemplazar en descripciones
+        const map = {};
+        (clientsData || []).forEach(c => {
+          const id = c.idCliente ?? c.id;
+          const nombre = c.nombreCompleto ?? c.nombre ?? c.name ?? '';
+          if (id && nombre) map[id] = nombre;
+        });
+        setClientsMap(map);
       } catch (error) {
         console.error('❌ Error cargando bitácora:', error);
       } finally {
@@ -156,7 +168,7 @@ const Bitacora = () => {
     total:    filteredLogs.length,
     logins:   filteredLogs.filter(l => l.accion === 'LOGIN').length,
     pedidos:  filteredLogs.filter(l => ['CREAR_PEDIDO','ACTUALIZACION_PEDIDO','ACTUALIZAR_ESTADO','ELIMINAR_PEDIDO'].includes(l.accion)).length,
-    usuarios: filteredLogs.filter(l => ['CREAR_USUARIO','DESACTIVAR_USUARIO','CAMBIO_PASSWORD'].includes(l.accion)).length,
+    usuarios: filteredLogs.filter(l => ['CREAR_USUARIO','DESACTIVAR_USUARIO','CAMBIO_PASSWORD','EDITAR_USUARIO','ACTIVAR_USUARIO','CAMBIAR_CONTRASENA'].includes(l.accion)).length,
   };
 
   // ── Agrupado por fecha ──────────────────────────────────────────────────────
@@ -186,17 +198,58 @@ const Bitacora = () => {
 
   const formatDate = (d) => d ? d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
 
-  // ── Iconos y badges ─────────────────────────────────────────────────────────
+  // Reemplaza "Cliente ID: 129" → "Cliente Nataly Recinos" en la descripción
+  const resolveDesc = (desc) => {
+    if (!desc) return desc;
+
+    // "Actualizó datos del Cliente ID: 129. Nombre actual: Nataly Recinos"
+    // → "Se actualizó la información de Nataly Recinos"
+    const editMatch = desc.match(
+      /Actualiz[oó]\s+datos\s+del\s+Cliente\s+(?:ID:\s*(\d+)|(.+?))\.\s+\w+\s+actual:\s+(.+)/i
+    );
+    if (editMatch) {
+      const [, idStr, nombreDirecto, nombreActual] = editMatch;
+      const clienteNombre = idStr
+        ? (clientsMap[Number(idStr)] || nombreActual.trim())
+        : (nombreDirecto || nombreActual || '').trim();
+      return `Se actualizó la información de ${clienteNombre}`;
+    }
+
+    return desc
+      // Reemplaza "Cliente ID: 129" → "Cliente Nataly Recinos"
+      .replace(/Cliente ID:\s*(\d+)/gi, (_, id) => {
+        const nombre = clientsMap[Number(id)];
+        return nombre ? `Cliente ${nombre}` : `Cliente ID: ${id}`;
+      })
+      // Verbos en pasado
+      .replace(/\bDESACTIVAR\b/g, 'Desactivó')
+      .replace(/\bACTIVAR\b/g,    'Activó')
+      .replace(/\bELIMINAR\b/g,   'Eliminó')
+      .replace(/\bCREAR\b/g,      'Creó')
+      .replace(/\bACTUALIZAR\b/g, 'Actualizó')
+      .replace(/\bCANCELAR\b/g,   'Canceló');
+  };
+
+  // ── Iconos, badges y etiquetas legibles ────────────────────────────────────
   const getActionIcon = (action) => {
     const icons = {
-      'LOGIN':               <LogIn   size={20} color="#2563eb" />,
-      'CREAR_PEDIDO':        <Plus    size={20} color="#10b981" />,
-      'ACTUALIZAR_ESTADO':   <Clock   size={20} color="#f59e0b" />,
-      'ACTUALIZACION_PEDIDO':<Clock   size={20} color="#f59e0b" />,
-      'ELIMINAR_PEDIDO':     <Trash2  size={20} color="#dc2626" />,
-      'CREAR_USUARIO':       <UserPlus size={20} color="#8b5cf6" />,
-      'CAMBIO_PASSWORD':     <Clock   size={20} color="#3b82f6" />,
-      'DESACTIVAR_USUARIO':  <Trash2  size={20} color="#ef4444" />
+      'LOGIN':               <LogIn       size={20} color="#2563eb" />,  /* azul */
+      'CREAR_PEDIDO':        <Plus        size={20} color="#10b981" />,  /* verde */
+      'ACTUALIZAR_ESTADO':   <RefreshCw   size={20} color="#d97706" />,  /* ámbar */
+      'ACTUALIZACION_PEDIDO':<RefreshCw   size={20} color="#d97706" />,  /* ámbar */
+      'ELIMINAR_PEDIDO':     <Trash2      size={20} color="#dc2626" />,  /* rojo */
+      'CREAR_USUARIO':       <UserPlus    size={20} color="#8b5cf6" />,  /* púrpura */
+      'CAMBIO_PASSWORD':     <KeyRound    size={20} color="#db2777" />,  /* rosa */
+      'CAMBIAR_CONTRASENA':  <KeyRound    size={20} color="#db2777" />,  /* rosa */
+      'DESACTIVAR_USUARIO':  <Trash2      size={20} color="#ea580c" />,  /* naranja */
+      'EDITAR_USUARIO':      <Pencil      size={20} color="#6366f1" />,  /* índigo */
+      'ACTIVAR_USUARIO':     <UserCheck   size={20} color="#15803d" />,  /* verde */
+      'ESTADO_CLIENTE':      <ToggleRight size={20} color="#0d9488" />,  /* teal */
+      'EDITAR_CLIENTE':      <Pencil      size={20} color="#65a30d" />,  /* lima */
+      'CANCELAR_PEDIDO':     <Ban         size={20} color="#e11d48" />,  /* rosa-rojo */
+      'CREAR_COMUNIDAD':     <Plus        size={20} color="#10b981" />,  /* verde */
+      'ESTADO_COMUNIDAD':    <ToggleRight size={20} color="#0d9488" />,  /* teal */
+      'CREAR_CLIENTE':       <Users       size={20} color="#0891b2" />,  /* cian */
     };
     return icons[action] || <Clock size={20} color="#64748b" />;
   };
@@ -209,10 +262,42 @@ const Bitacora = () => {
       'ACTUALIZACION_PEDIDO':'update',
       'ELIMINAR_PEDIDO':     'delete',
       'CREAR_USUARIO':       'user-create',
-      'CAMBIO_PASSWORD':     'update',
-      'DESACTIVAR_USUARIO':  'delete'
+      'CAMBIO_PASSWORD':     'password',
+      'CAMBIAR_CONTRASENA':  'password',
+      'DESACTIVAR_USUARIO':  'deactivate',
+      'EDITAR_USUARIO':      'user-edit',
+      'ACTIVAR_USUARIO':     'user-activate',
+      'ESTADO_CLIENTE':      'status',
+      'EDITAR_CLIENTE':      'edit',
+      'CANCELAR_PEDIDO':     'cancel',
+      'CREAR_COMUNIDAD':     'create',
+      'ESTADO_COMUNIDAD':    'status',
+      'CREAR_CLIENTE':       'client-create',
     };
     return badges[action] || 'default';
+  };
+
+  const getActionLabel = (action) => {
+    const labels = {
+      'LOGIN':               'Inició Sesión',
+      'CREAR_PEDIDO':        'Creó Pedido',
+      'ACTUALIZAR_ESTADO':   'Actualizó Estado',
+      'ACTUALIZACION_PEDIDO':'Actualizó Pedido',
+      'ELIMINAR_PEDIDO':     'Eliminó Pedido',
+      'CREAR_USUARIO':       'Creó Usuario',
+      'CAMBIO_PASSWORD':     'Cambió Contraseña',
+      'CAMBIAR_CONTRASENA':  'Cambió Contraseña',
+      'DESACTIVAR_USUARIO':  'Desactivó Usuario',
+      'EDITAR_USUARIO':      'Editó Usuario',
+      'ACTIVAR_USUARIO':     'Activó Usuario',
+      'ESTADO_CLIENTE':      'Cambió Estado',
+      'EDITAR_CLIENTE':      'Editó Cliente',
+      'CANCELAR_PEDIDO':     'Canceló Pedido',
+      'CREAR_COMUNIDAD':     'Creó Comunidad',
+      'ESTADO_COMUNIDAD':    'Cambió Estado',
+      'CREAR_CLIENTE':       'Creó Cliente',
+    };
+    return labels[action] || action;
   };
 
   if (loading) return <div className="loading">Cargando bitácora...</div>;
@@ -339,9 +424,10 @@ const Bitacora = () => {
                   <div className="log-content">
                     <div className="log-header-row">
                       <h4 className="log-user">{log.nombreUsuario || 'Sistema'}</h4>
-                      <span className="log-action-badge">{log.accion}</span>
+                      <span className="log-bullet">•</span>
+                      <span className="log-action-badge">{getActionLabel(log.accion)}</span>
                     </div>
-                    <p className="log-details">{log.descripcion}</p>
+                    <p className="log-details">{resolveDesc(log.descripcion)}</p>
                     <p className="log-time">
                       {new Date(log.fechaHora).toLocaleTimeString('es-ES', {
                         hour: '2-digit', minute: '2-digit', second: '2-digit'

@@ -122,13 +122,30 @@ export const communityService = {
     return response.data;
   },
 
-  create: async (nombre) => {
-    const response = await api.post('/api/Comunidades', { nombreComunidad: nombre });
+  create: async (nombre, idUsuarioCreador) => {
+    const response = await api.post('/api/Comunidades', {
+      nombreComunidad: nombre,
+      idUsuarioCreador: idUsuarioCreador
+    }, {
+      validateStatus: (status) => status >= 200 && status < 300
+    });
     return response.data;
   },
 
-  update: async (id, nombre) => {
-    const response = await api.put(`/api/Comunidades/${id}`, { nombreComunidad: nombre });
+  update: async (id, nombre, idUsuarioModificador) => {
+    const response = await api.put(`/api/Comunidades/${id}`, {
+      nombreComunidad: nombre,
+      idUsuarioModificador: idUsuarioModificador
+    }, {
+      validateStatus: (status) => status >= 200 && status < 300
+    });
+    return response.data;
+  },
+
+  toggleEstado: async (id, activa) => {
+    const response = await api.patch(`/api/Comunidades/${id}/estado`, { activa }, {
+      validateStatus: (status) => status >= 200 && status < 300
+    });
     return response.data;
   },
 
@@ -151,12 +168,21 @@ export const clientService = {
   },
 
   create: async (clientData) => {
-    const response = await api.post('/api/Clientes', clientData);
+    const response = await api.post('/api/Clientes', clientData, {
+      validateStatus: (status) => status >= 200 && status < 300
+    });
     return response.data;
   },
 
   update: async (id, clientData) => {
     const response = await api.put(`/api/Clientes/${id}`, clientData);
+    return response.data;
+  },
+
+  toggleEstado: async (id, activo) => {
+    const response = await api.patch(`/api/Clientes/${id}/estado`, { activo }, {
+      validateStatus: (status) => status >= 200 && status < 300
+    });
     return response.data;
   },
 
@@ -179,15 +205,24 @@ export const userService = {
   },
   
   changePassword: async (userId, newPassword) => {
-    const response = await api.post('/api/Auth/change-password', { 
-      usuarioId: userId, 
-      nuevaContrasena: newPassword 
+    const response = await api.put(`/api/Usuarios/${userId}/cambiar-contrasena`, {
+      nuevaContrasena: newPassword
     });
     return response.data;
   },
   
   deactivate: async (userId) => {
     const response = await api.put(`/api/Usuarios/${userId}/desactivar`);
+    return response.data;
+  },
+
+  reactivate: async (userId) => {
+    const response = await api.put(`/api/Usuarios/${userId}/habilitar`);
+    return response.data;
+  },
+
+  update: async (userId, userData) => {
+    const response = await api.put(`/api/Usuarios/${userId}`, userData);
     return response.data;
   }
 };

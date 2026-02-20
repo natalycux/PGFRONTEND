@@ -111,7 +111,7 @@ const Pedidos = () => {
         tipoTransaccion: formData.transactionType,
         cantidadGarrafones: parseInt(formData.bottles) || 1,
         precioUnitario: parseFloat(formData.unitPrice) || 0,
-        montoDescuento: parseFloat(formData.discount) || 0,
+        montoDescuento: 0,
         estadoInicial: formData.initialStatus,
         notasAdicionales: formData.notes || ''
       };
@@ -436,30 +436,15 @@ const Pedidos = () => {
                     <span className="input-suffix">Q</span>
                   </div>
                 </div>
-                {formData.transactionType === 'Descuento' && (
-                  <div className="form-group form-group--full">
-                    <label>Monto de Descuento (Q)</label>
-                    <div className="input-with-suffix">
-                      <input type="number" min="0" step="0.01" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} />
-                      <span className="input-suffix">Q</span>
-                    </div>
-                  </div>
-                )}
                 {formData.transactionType !== 'Donacion' && (
                   <div className="order-total-box form-group--full">
                     <div className="order-total-row">
                       <span>{parseInt(formData.bottles) || 0} garrafón(es) × Q{(parseFloat(formData.unitPrice) || 0).toFixed(2)}</span>
                       <span>Q{((parseInt(formData.bottles) || 0) * (parseFloat(formData.unitPrice) || 0)).toFixed(2)}</span>
                     </div>
-                    {formData.transactionType === 'Descuento' && parseFloat(formData.discount) > 0 && (
-                      <div className="order-total-row order-total-discount">
-                        <span>Descuento</span>
-                        <span>- Q{(parseFloat(formData.discount) || 0).toFixed(2)}</span>
-                      </div>
-                    )}
                     <div className="order-total-row order-total-final">
                       <span>Total</span>
-                      <span>Q{Math.max(0, ((parseInt(formData.bottles) || 0) * (parseFloat(formData.unitPrice) || 0)) - (formData.transactionType === 'Descuento' ? (parseFloat(formData.discount) || 0) : 0)).toFixed(2)}</span>
+                      <span>Q{((parseInt(formData.bottles) || 0) * (parseFloat(formData.unitPrice) || 0)).toFixed(2)}</span>
                     </div>
                   </div>
                 )}

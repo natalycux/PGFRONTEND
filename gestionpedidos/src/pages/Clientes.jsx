@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { clientService, communityService } from '../services/api';
-import { Users, Building2, Phone, Plus, X, Save, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import { Users, Building2, Phone, Plus, X, Save, Pencil, XCircle, CheckCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 import './Clientes.css';
 
 const Clientes = () => {
@@ -22,9 +23,8 @@ const Clientes = () => {
   const [editErrors, setEditErrors] = useState({});
   const [editLoading, setEditLoading] = useState(false);
 
-  // Eliminar
-  const [deletingId, setDeletingId] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  // Toggle estado
+  const [toggleLoading, setToggleLoading] = useState(false);
 
   useEffect(() => {
     loadAll();
@@ -50,9 +50,13 @@ const Clientes = () => {
   };
 
   // ── Stats ──────────────────────────────────────────────────────
-  const totalClients = clients.length;
+  const totalClients  = clients.length;
+  const activeClients = clients.filter(c => c.activo || c.activa).length;
   const activeCommunities = new Set(clients.map(c => c.idComunidad).filter(Boolean)).size;
   const withPhone = clients.filter(c => c.telefono?.trim()).length;
+
+  // Comunidades activas (para los formularios)
+  const activeCommunityList = communities.filter(c => c.activa);
 
   // ── Filtrado ───────────────────────────────────────────────────
   const filtered = filterCommunity
@@ -65,7 +69,6 @@ const Clientes = () => {
     setFormData({ nombre: '', communityId: '', telefono: '', direccion: '' });
     setFormErrors({});
     setEditingId(null);
-    setDeletingId(null);
   };
 
   const closeForm = () => {
@@ -95,8 +98,49 @@ const Clientes = () => {
       });
       await loadAll();
       closeForm();
+      Swal.fire({
+        icon: 'success',
+        title: '¡Cliente creado!',
+        text: `"${formData.nombre.trim()}" fue registrado exitosamente.`,
+        confirmButtonColor: '#2563eb',
+        timer: 2500,
+        timerProgressBar: true
+      });
     } catch (err) {
-      setFormErrors({ general: err.response?.data?.message || 'Error al crear el cliente.' });
+      // El backend puede insertar correctamente pero fallar al serializar la respuesta (500).
+      // Recargamos y verificamos si el cliente fue creado.
+      try {
+        const [clientsData, communitiesData] = await Promise.all([
+          clientService.getAll(),
+          communityService.getAll()
+        ]);
+        const nombreBuscado = formData.nombre.trim().toLowerCase();
+        const wasCreated = clientsData.some(
+          (c) => c.nombreCompleto?.toLowerCase() === nombreBuscado &&
+                 String(c.idComunidad) === String(formData.communityId)
+        );
+        if (wasCreated) {
+          setClients(clientsData);
+          setCommunities(communitiesData);
+          closeForm();
+          Swal.fire({
+            icon: 'success',
+            title: '¡Cliente creado!',
+            text: `"${formData.nombre.trim()}" fue registrado exitosamente.`,
+            confirmButtonColor: '#2563eb',
+            timer: 2500,
+            timerProgressBar: true
+          });
+          return;
+        }
+      } catch (_) { /* mostrar error original */ }
+
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.title ||
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        'Error al crear el cliente.';
+      setFormErrors({ general: msg });
     } finally {
       setCreateLoading(false);
     }
@@ -112,7 +156,6 @@ const Clientes = () => {
       direccion: client.direccionDetallada || ''
     });
     setEditErrors({});
-    setDeletingId(null);
     setShowForm(false);
   };
 
@@ -138,20 +181,42 @@ const Clientes = () => {
     }
   };
 
-  // ── Eliminar ───────────────────────────────────────────────────
-  const startDelete = (id) => { setDeletingId(id); setEditingId(null); setShowForm(false); };
-  const cancelDelete = () => setDeletingId(null);
+  // ── Toggle estado ──────────────────────────────────────────
+  const handleToggle = async (client) => {
+    const estaActivo = Boolean(client.activo ?? client.activa ?? true);
+    const accion = estaActivo ? 'desactivar' : 'activar';
+    const accionPasado = estaActivo ? 'desactivado' : 'activado';
 
-  const handleDelete = async (id) => {
-    setDeleteLoading(true);
+    const result = await Swal.fire({
+      title: `¿${estaActivo ? 'Desactivar' : 'Activar'} cliente?`,
+      text: `"${client.nombreCompleto}" será ${accionPasado}.`,
+      icon: estaActivo ? 'warning' : 'question',
+      showCancelButton: true,
+      confirmButtonColor: estaActivo ? '#e11d48' : '#16a34a',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+
+    setToggleLoading(true);
     try {
-      await clientService.delete(id);
+      await clientService.toggleEstado(client.idCliente, !estaActivo);
       await loadAll();
-      setDeletingId(null);
+      Swal.fire({
+        icon: 'success',
+        title: estaActivo ? '¡Cliente desactivado!' : '¡Cliente activado!',
+        text: `"${client.nombreCompleto}" fue ${accionPasado} exitosamente.`,
+        confirmButtonColor: '#2563eb',
+        timer: 2000,
+        timerProgressBar: true
+      });
     } catch (err) {
-      console.error('Error eliminando cliente:', err);
+      console.error('Error cambiando estado de cliente:', err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.', confirmButtonColor: '#2563eb' });
     } finally {
-      setDeleteLoading(false);
+      setToggleLoading(false);
     }
   };
 
@@ -191,6 +256,15 @@ const Clientes = () => {
           <div>
             <p className="cli-stat-label">Total Clientes</p>
             <p className="cli-stat-value">{totalClients}</p>
+          </div>
+        </div>
+        <div className="cli-stat-card">
+          <div className="cli-stat-icon cli-icon-green">
+            <CheckCircle size={22} />
+          </div>
+          <div>
+            <p className="cli-stat-label">Activos</p>
+            <p className="cli-stat-value">{activeClients}</p>
           </div>
         </div>
         <div className="cli-stat-card">
@@ -244,7 +318,7 @@ const Clientes = () => {
                   onChange={(e) => { setFormData({ ...formData, communityId: e.target.value }); setFormErrors({ ...formErrors, communityId: '' }); }}
                 >
                   <option value="">Selecciona una comunidad</option>
-                  {communities.map(c => (
+                  {activeCommunityList.map(c => (
                     <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>
                   ))}
                 </select>
@@ -329,40 +403,42 @@ const Clientes = () => {
               <div key={client.idCliente}>
 
                 {/* Fila normal */}
-                {editingId !== client.idCliente && (
-                  <div className={`cli-table-row${deletingId === client.idCliente ? ' cli-row--deleting' : ''}`}>
+                {editingId !== client.idCliente && (() => {
+                  const isActive = Boolean(client.activo ?? client.activa ?? true);
+                  return (
+                  <div className={`cli-table-row${!isActive ? ' cli-row--inactive' : ''}`}>
                     <div className="cli-cell-name">
-                      <div className="cli-client-icon">
+                      <div className={`cli-client-icon${!isActive ? ' cli-client-icon--inactive' : ''}`}>
                         <Users size={16} />
                       </div>
                       <span className="cli-client-name">{client.nombreCompleto}</span>
+                      {isActive
+                        ? <span className="cli-badge cli-badge--active">Activo</span>
+                        : <span className="cli-badge cli-badge--inactive">Inactivo</span>
+                      }
                     </div>
                     <span className="cli-cell">{getCommunityName(client.idComunidad)}</span>
                     <span className="cli-cell">{client.telefono || '—'}</span>
                     <span className="cli-cell cli-cell-dir">{client.direccionDetallada || '—'}</span>
                     <div className="cli-cell-actions">
-                      {deletingId !== client.idCliente ? (
-                        <>
-                          <button className="cli-icon-btn cli-icon-edit" title="Editar" onClick={() => startEdit(client)}>
-                            <Pencil size={16} />
-                          </button>
-                          <button className="cli-icon-btn cli-icon-delete" title="Eliminar" onClick={() => startDelete(client.idCliente)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </>
+                      {isActive && (
+                        <button className="cli-icon-btn cli-icon-edit" title="Editar" onClick={() => startEdit(client)}>
+                          <Pencil size={16} />
+                        </button>
+                      )}
+                      {isActive ? (
+                        <button className="cli-icon-btn cli-icon-delete" title="Desactivar cliente" onClick={() => handleToggle(client)}>
+                          <XCircle size={16} />
+                        </button>
                       ) : (
-                        <div className="cli-confirm-delete">
-                          <AlertCircle size={14} />
-                          <span>¿Eliminar?</span>
-                          <button className="cli-confirm-yes" onClick={() => handleDelete(client.idCliente)} disabled={deleteLoading}>
-                            {deleteLoading ? '...' : 'Sí'}
-                          </button>
-                          <button className="cli-confirm-no" onClick={cancelDelete} disabled={deleteLoading}>No</button>
-                        </div>
+                        <button className="cli-icon-btn cli-icon-activate" title="Activar cliente" onClick={() => handleToggle(client)}>
+                          <CheckCircle size={16} />
+                        </button>
                       )}
                     </div>
                   </div>
-                )}
+                  );
+                })()}
 
                 {/* Fila editando */}
                 {editingId === client.idCliente && (
@@ -384,7 +460,7 @@ const Clientes = () => {
                         onChange={(e) => { setEditData({ ...editData, communityId: e.target.value }); setEditErrors({ ...editErrors, communityId: '' }); }}
                       >
                         <option value="">Comunidad...</option>
-                        {communities.map(c => (
+                        {activeCommunityList.map(c => (
                           <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>
                         ))}
                       </select>

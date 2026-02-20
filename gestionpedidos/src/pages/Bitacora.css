@@ -338,49 +338,54 @@
 .log-entry {
   display: flex;
   gap: 16px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 4px solid;
-  transition: all 0.2s;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .log-entry:hover {
-  background: #f1f5f9;
-  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
 }
 
-.log-entry.login {
-  border-left-color: #2563eb;
-}
-
-.log-entry.create {
-  border-left-color: #10b981;
-}
-
-.log-entry.delete {
-  border-left-color: #dc2626;
-}
-
-.log-entry.user-create {
-  border-left-color: #8b5cf6;
-}
-
-.log-entry.default {
-  border-left-color: #64748b;
-}
+/* ── Colores de borde izquierdo (eliminados, ahora usa fondo en ícono) ── */
+.log-entry.login {}
+.log-entry.create {}
+.log-entry.update {}
+.log-entry.delete {}
+.log-entry.cancel {}
+.log-entry.user-create {}
+.log-entry.password {}
+.log-entry.deactivate {}
+.log-entry.status {}
+.log-entry.edit {}
+.log-entry.default {}
 
 .log-icon {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+/* Fondo del ícono por tipo de acción */
+.log-entry.login      .log-icon { background: #dbeafe; }
+.log-entry.create     .log-icon { background: #d1fae5; }
+.log-entry.update     .log-icon { background: #fef3c7; }
+.log-entry.delete     .log-icon { background: #fee2e2; }
+.log-entry.cancel     .log-icon { background: #ffe4e6; }
+.log-entry.user-create .log-icon { background: #e9d5ff; }
+.log-entry.password   .log-icon { background: #fce7f3; }
+.log-entry.deactivate .log-icon { background: #ffedd5; }
+.log-entry.status     .log-icon { background: #ccfbf1; }
+.log-entry.edit       .log-icon { background: #ecfccb; }
+.log-entry.default    .log-icon { background: #e2e8f0; }
 
 .log-content {
   flex: 1;
@@ -389,10 +394,10 @@
 
 .log-header-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .log-user {
@@ -402,34 +407,104 @@
   margin: 0;
 }
 
+.log-bullet {
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1;
+}
+
 .log-action-badge {
   font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
   font-weight: 500;
   white-space: nowrap;
 }
 
+/* Azul — Login */
 .log-entry.login .log-action-badge {
   background: #dbeafe;
   color: #1e40af;
 }
 
+/* Verde — Crear pedido */
 .log-entry.create .log-action-badge {
   background: #d1fae5;
   color: #065f46;
 }
 
+/* Ámbar — Actualizar estado / pedido */
+.log-entry.update .log-action-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Rojo — Eliminar */
 .log-entry.delete .log-action-badge {
   background: #fee2e2;
   color: #991b1b;
 }
 
+/* Cian — Crear cliente */
+.log-entry.client-create .log-icon { background: #cffafe; }
+
+.log-entry.client-create .log-action-badge {
+  background: #cffafe;
+  color: #164e63;
+}
+
+/* Púrpura — Crear usuario */
 .log-entry.user-create .log-action-badge {
   background: #e9d5ff;
   color: #6b21a8;
 }
 
+/* Rosa — Cambio de contraseña */
+.log-entry.password .log-action-badge {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+/* Naranja — Desactivar usuario */
+.log-entry.deactivate .log-icon { background: #ffedd5; }
+.log-entry.deactivate .log-action-badge {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+/* Índigo — Editar usuario */
+.log-entry.user-edit .log-icon { background: #e0e7ff; }
+.log-entry.user-edit .log-action-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Verde — Activar usuario */
+.log-entry.user-activate .log-icon { background: #dcfce7; }
+.log-entry.user-activate .log-action-badge {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+/* Rosa-rojo — Cancelar pedido */
+.log-entry.cancel .log-action-badge {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
+/* Verde azulado (teal) — Estado cliente */
+.log-entry.status .log-action-badge {
+  background: #ccfbf1;
+  color: #134e4a;
+}
+
+/* Lima — Editar cliente */
+.log-entry.edit .log-action-badge {
+  background: #ecfccb;
+  color: #365314;
+}
+
+/* Gris — Por defecto */
 .log-entry.default .log-action-badge {
   background: #e2e8f0;
   color: #475569;
@@ -468,8 +543,9 @@
   }
 
   .log-header-row {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .log-entry {

@@ -94,6 +94,8 @@
   color: #2563eb;
   flex-shrink: 0;
 }
+.com-stat-icon--green { background: #f0fdf4; color: #16a34a; }
+.com-stat-icon--gray  { background: #f1f5f9; color: #94a3b8; }
 
 .com-stat-label {
   font-size: 13px;
@@ -251,7 +253,8 @@
 
 .com-table-row:last-child { border-bottom: none; }
 .com-table-row:hover { background: #f8fafc; }
-.com-table-row.com-row--deleting { background: #fff1f2; }
+.com-table-row.com-row--deleting { background: #fff7ed; }
+.com-table-row.com-row--inactive { opacity: .65; background: #f8fafc; }
 .com-table-row.com-row--editing { background: #eff6ff; align-items: start; padding-top: 16px; padding-bottom: 16px; }
 
 /* Celda nombre */
@@ -272,6 +275,19 @@
   color: #2563eb;
   flex-shrink: 0;
 }
+.com-community-icon--inactive { background: #f1f5f9; color: #94a3b8; }
+
+/* Badge estado */
+.com-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: .3px;
+  flex-shrink: 0;
+}
+.com-badge--active   { background: #dcfce7; color: #15803d; }
+.com-badge--inactive { background: #f1f5f9; color: #64748b; }
 
 .com-community-name {
   font-size: 14px;
@@ -311,6 +327,9 @@
 .com-icon-delete { color: #e11d48; }
 .com-icon-delete:hover { background: #fff1f2; }
 
+.com-icon-activate { color: #16a34a; }
+.com-icon-activate:hover { background: #f0fdf4; }
+
 /* Confirmación eliminar inline */
 .com-confirm-delete {
   display: flex;
@@ -337,6 +356,8 @@
 
 .com-confirm-yes:hover:not(:disabled) { background: #be123c; }
 .com-confirm-yes:disabled { opacity: .65; cursor: not-allowed; }
+.com-confirm-yes--activate { background: #16a34a; }
+.com-confirm-yes--activate:hover:not(:disabled) { background: #15803d; }
 
 .com-confirm-no {
   background: #f1f5f9;
