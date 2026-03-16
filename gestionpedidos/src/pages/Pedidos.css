@@ -345,6 +345,28 @@
   margin: 2px 0 0 0;
 }
 
+.delivered-note {
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 2px 0 0 0;
+}
+
+/* Pedido entregado */
+.order-item--delivered {
+  background: #f8fafc;
+}
+
+.order-id-circle--delivered {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.delivered-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
 /* ─── Acciones por pedido ────────────────────────────────────── */
 .order-item-actions {
   display: flex;

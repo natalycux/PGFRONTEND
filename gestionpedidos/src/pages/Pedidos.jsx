@@ -298,15 +298,18 @@ const Pedidos = () => {
         <div className="orders-list" ref={dropdownRef}>
           {filteredOrders.map(order => {
             const isCancelled = order.estadoPedido === 'Cancelado';
+            const isDelivered = order.estadoPedido === 'Entregado';
+            const isLocked    = isCancelled || isDelivered;
             const cancelInfo = isCancelled ? getCancellationInfo(order) : null;
             return (
-              <div key={order.idPedido} className={`order-item${isCancelled ? ' order-item--cancelled' : ''}`}>
-                <div className={`order-id-circle${isCancelled ? ' order-id-circle--cancelled' : ''}`}>#{order.idPedido}</div>
+              <div key={order.idPedido} className={`order-item${isCancelled ? ' order-item--cancelled' : ''}${isDelivered ? ' order-item--delivered' : ''}`}>
+                <div className={`order-id-circle${isCancelled ? ' order-id-circle--cancelled' : ''}${isDelivered ? ' order-id-circle--delivered' : ''}`}>#{order.idPedido}</div>
                 <div className="order-content">
                   <div className="order-item-header">
                     <div className="order-name-row">
                       <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
                       {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
+                      {isDelivered && <span className="delivered-icon" title="Entregado">✅</span>}
                     </div>
                     <div className="order-badges">
                       {getStatusBadge(order.estadoPedido)}
@@ -361,7 +364,8 @@ const Pedidos = () => {
                   </div>
                 )}
                 {isCancelled && <p className="cancelled-note">Este pedido ha sido cancelado y no puede ser modificado</p>}
-                {!isCancelled && (
+                {isDelivered && <p className="delivered-note">Este pedido ha sido entregado y no puede ser modificado</p>}
+                {!isLocked && (
                   <div className="order-item-actions">
                     <div className="status-dropdown-wrapper">
                       <button className="status-dropdown-btn" onClick={() => setOpenDropdownId(openDropdownId === order.idPedido ? null : order.idPedido)}>
