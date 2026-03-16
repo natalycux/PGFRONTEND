@@ -399,14 +399,14 @@ const Pedidos = () => {
                   <label>Comunidad *</label>
                   <select value={formData.communityId} onChange={handleCommunityChange} required>
                     <option value="">Selecciona una comunidad</option>
-                    {communities.map(c => <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>)}
+                    {communities.filter(c => c.activa).map(c => <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Cliente *</label>
                   <select value={formData.clientId} onChange={(e) => setFormData({ ...formData, clientId: e.target.value })} required disabled={!formData.communityId}>
                     <option value="">Primero selecciona una comunidad</option>
-                    {clients.map(c => <option key={c.idCliente} value={c.idCliente}>{c.nombreCompleto}</option>)}
+                    {clients.filter(c => Boolean(c.activo ?? c.activa ?? true)).map(c => <option key={c.idCliente} value={c.idCliente}>{c.nombreCompleto}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
