@@ -63,6 +63,108 @@
   gap: 20px;
 }
 
+.users-table-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.users-table-header {
+  display: grid;
+  grid-template-columns: 88px minmax(220px, 1.2fr) 130px 190px 1.2fr 1fr 140px;
+  padding: 12px 24px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.users-table-header span:first-child { text-align: center; }
+.users-table-header .col-acciones { text-align: right; }
+
+.users-table-row {
+  display: grid;
+  grid-template-columns: 88px minmax(220px, 1.2fr) 130px 190px 1.2fr 1fr 140px;
+  align-items: center;
+  min-height: 88px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.users-table-row:last-child { border-bottom: none; }
+.users-table-row:hover { background: #f8fafc; }
+.users-row-inactive { opacity: 0.65; background: #f8fafc; }
+
+.us-cell-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.us-number-dot {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.us-number-dot--inactive {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.us-cell-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.us-cell-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.us-status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.us-status-badge--active {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.us-status-badge--inactive {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.us-cell-role .role-badge {
+  width: fit-content;
+}
+
 .user-card {
   background: white;
   border-radius: 12px;
@@ -90,7 +192,7 @@
 }
 
 .user-name {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: #1e293b;
   margin: 0;
@@ -162,19 +264,35 @@
 .user-email {
   font-size: 14px;
   color: #475569;
-  margin: 0 0 4px 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-created {
-  font-size: 13px;
-  color: #94a3b8;
+  font-size: 13.5px;
+  color: #475569;
   margin: 0;
 }
 
 .user-actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.action-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .action-button {
@@ -231,6 +349,13 @@
 }
 
 .action-button.deactivate-disabled {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+}
+
+.action-icon-btn.deactivate-disabled {
   background: #f1f5f9 !important;
   border-color: #e2e8f0 !important;
   color: #94a3b8 !important;
@@ -396,4 +521,43 @@
 
 .toggle-password:hover {
   color: #1e293b;
+}
+
+@media (max-width: 1024px) {
+  .users-table-header,
+  .users-table-row {
+    grid-template-columns: 72px 1.1fr 120px 160px 120px;
+  }
+
+  .users-table-header span:nth-child(5),
+  .users-table-header span:nth-child(6),
+  .users-table-row > *:nth-child(5),
+  .users-table-row > *:nth-child(6) {
+    display: none;
+  }
+
+  .us-number-dot {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .us-status-badge {
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+}
+
+@media (max-width: 600px) {
+  .users-table-header,
+  .users-table-row {
+    grid-template-columns: 58px 1fr 96px 98px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .users-table-header span:nth-child(4),
+  .users-table-row > *:nth-child(4) {
+    display: none;
+  }
 }

@@ -384,7 +384,9 @@ const Clientes = () => {
       {/* ── Tabla ── */}
       <div className="cli-table-card">
         <div className="cli-table-header">
+          <span>#</span>
           <span>CLIENTE</span>
+          <span>ESTADO</span>
           <span>COMUNIDAD</span>
           <span>TELÉFONO</span>
           <span>DIRECCIÓN</span>
@@ -407,14 +409,18 @@ const Clientes = () => {
                   const isActive = Boolean(client.activo ?? client.activa ?? true);
                   return (
                   <div className={`cli-table-row${!isActive ? ' cli-row--inactive' : ''}`}>
+                    <div className="cli-cell-id">
+                      <span className={`cli-number-dot${!isActive ? ' cli-number-dot--inactive' : ''}`}>{client.idCliente}</span>
+                    </div>
                     <div className="cli-cell-name">
                       <div className={`cli-client-icon${!isActive ? ' cli-client-icon--inactive' : ''}`}>
                         <Users size={16} />
                       </div>
                       <div className="cli-name-block">
                         <span className="cli-client-name">{client.nombreCompleto}</span>
-                        <span className="cli-id-tag">#{client.idCliente}</span>
                       </div>
+                    </div>
+                    <div className="cli-cell-status">
                       {isActive
                         ? <span className="cli-badge cli-badge--active">Activo</span>
                         : <span className="cli-badge cli-badge--inactive">Inactivo</span>
@@ -446,6 +452,9 @@ const Clientes = () => {
                 {/* Fila editando */}
                 {editingId === client.idCliente && (
                   <div className="cli-table-row cli-row--editing">
+                    <div className="cli-cell-id">
+                      <span className="cli-number-dot">{client.idCliente}</span>
+                    </div>
                     <div className="cli-edit-cell">
                       <input
                         className={`cli-input cli-input--inline${editErrors.nombre ? ' cli-input--error' : ''}`}
@@ -455,6 +464,12 @@ const Clientes = () => {
                         autoFocus
                       />
                       {editErrors.nombre && <p className="cli-field-error">{editErrors.nombre}</p>}
+                    </div>
+                    <div className="cli-cell-status">
+                      {Boolean(client.activo ?? client.activa ?? true)
+                        ? <span className="cli-badge cli-badge--active">Activo</span>
+                        : <span className="cli-badge cli-badge--inactive">Inactivo</span>
+                      }
                     </div>
                     <div className="cli-edit-cell">
                       <select

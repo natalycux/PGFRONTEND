@@ -184,72 +184,86 @@ const Usuarios = () => {
         <h3>Usuarios Registrados ({users.length}) &middot; Activos: {users.filter(u => u.activo !== false).length}</h3>
       </div>
 
-      <div className="users-list">
-        {users.map((user) => (
-          <div key={user.idUsuario} className={`user-card${user.activo === false ? ' user-card-inactive' : ''}`}>
-            <div className="user-card-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 className="user-name">{user.nombreCompleto}</h3>
-                <span className="user-id-badge">#{user.idUsuario}</span>
-                {user.idUsuario === currentUser.id && (
-                  <span className="current-user-badge">Tu</span>
-                )}
-                {user.activo === false && (
-                  <span className="inactive-badge">Desactivado</span>
-                )}
+      <div className="users-table-card">
+        <div className="users-table-header">
+          <span>#</span>
+          <span>USUARIO</span>
+          <span>ESTADO</span>
+          <span>ROL</span>
+          <span>CORREO</span>
+          <span>FECHA DE CREACIÓN</span>
+          <span className="col-acciones">ACCIONES</span>
+        </div>
+
+        <div className="users-table-body">
+          {users.map((user) => {
+            const isActive = user.activo !== false;
+            return (
+              <div key={user.idUsuario} className={`users-table-row${!isActive ? ' users-row-inactive' : ''}`}>
+                <div className="us-cell-id">
+                  <span className={`us-number-dot${!isActive ? ' us-number-dot--inactive' : ''}`}>{user.idUsuario}</span>
+                </div>
+
+                <div className="us-cell-name">
+                  <span className="user-name">{user.nombreCompleto}</span>
+                  {user.idUsuario === currentUser.id && (
+                    <span className="current-user-badge">Tu</span>
+                  )}
+                </div>
+
+                <div className="us-cell-status">
+                  {isActive
+                    ? <span className="us-status-badge us-status-badge--active">Activo</span>
+                    : <span className="us-status-badge us-status-badge--inactive">Inactivo</span>
+                  }
+                </div>
+
+                <div className="us-cell-role">{getRoleBadge(user.rol)}</div>
+                <span className="user-email">{user.email}</span>
+                <span className="user-created">{new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</span>
+
+                <div className="user-actions">
+                  <button
+                    onClick={() => handleOpenEdit(user)}
+                    className="action-icon-btn edit"
+                    title="Editar usuario"
+                  >
+                    <Pencil size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleChangePassword(user.idUsuario)}
+                    className={`action-icon-btn change-password${!isActive ? ' deactivate-disabled' : ''}`}
+                    disabled={!isActive}
+                    title={!isActive ? 'Usuario desactivado' : 'Cambiar contraseña'}
+                  >
+                    <Key size={16} />
+                  </button>
+
+                  {user.idUsuario !== currentUser.id && (
+                    !isActive ? (
+                      <button
+                        onClick={() => handleReactivate(user.idUsuario)}
+                        className="action-icon-btn reactivate"
+                        title="Reactivar usuario"
+                      >
+                        <UserCheck size={16} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleDeactivate(user.idUsuario, user.activo)}
+                        className="action-icon-btn deactivate"
+                        title="Desactivar usuario"
+                      >
+                        <UserX size={16} />
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
-              {getRoleBadge(user.rol)}
-            </div>
-
-            <div className="user-info">
-              <p className="user-email">{user.email}</p>
-              <p className="user-created">Creado: {new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</p>
-            </div>
-
-            <div className="user-actions">
-              <button
-                onClick={() => handleOpenEdit(user)}
-                className="action-button edit"
-                title="Editar usuario"
-              >
-                <Pencil size={18} />
-                Editar
-              </button>
-
-              <button
-                onClick={() => handleChangePassword(user.idUsuario)}
-                className={`action-button change-password${user.activo === false ? ' deactivate-disabled' : ''}`}
-                disabled={user.activo === false}
-                title={user.activo === false ? 'Usuario desactivado' : 'Cambiar contrasena'}
-              >
-                <Key size={18} />
-                Cambiar Contrasena
-              </button>
-
-              {user.idUsuario !== currentUser.id && (
-                user.activo === false ? (
-                  <button
-                    onClick={() => handleReactivate(user.idUsuario)}
-                    className="action-button reactivate"
-                    title="Reactivar usuario"
-                  >
-                    <UserCheck size={18} />
-                    Reactivar
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleDeactivate(user.idUsuario, user.activo)}
-                    className="action-button deactivate"
-                    title="Desactivar usuario"
-                  >
-                    <UserX size={18} />
-                    Desactivar
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {showPasswordModal && (
