@@ -110,7 +110,7 @@ const Pedidos = () => {
         idCliente: parseInt(formData.clientId),
         tipoTransaccion: formData.transactionType,
         cantidadGarrafones: parseInt(formData.bottles) || 1,
-        precioUnitario: parseFloat(formData.unitPrice) || 0,
+        precioUnitario: formData.transactionType === 'Donacion' ? 0 : (parseFloat(formData.unitPrice) || 0),
         montoDescuento: 0,
         estadoInicial: formData.initialStatus,
         notasAdicionales: formData.notes || ''
@@ -306,6 +306,7 @@ const Pedidos = () => {
                     <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
                     {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
                   </div>
+                  <p className="order-number-label">Numero de pedido: <span>#{order.idPedido}</span></p>
                   <div className="order-badges">
                     {getStatusBadge(order.estadoPedido)}
                     {getTransactionBadge(order.tipoTransaccion, order.montoDescuento)}
@@ -411,7 +412,7 @@ const Pedidos = () => {
                 </div>
                 <div className="form-group">
                   <label>Tipo de Transacción *</label>
-                  <select value={formData.transactionType} onChange={(e) => setFormData({ ...formData, transactionType: e.target.value, discount: '' })} required>
+                  <select value={formData.transactionType} onChange={(e) => setFormData({ ...formData, transactionType: e.target.value, discount: '', unitPrice: e.target.value === 'Donacion' ? '' : formData.unitPrice })} required>
                     <option value="Venta">Venta</option>
                     <option value="Donacion">Donación</option>
                     <option value="Descuento">Descuento</option>
@@ -429,6 +430,7 @@ const Pedidos = () => {
                   <label>Cantidad de Garrafones *</label>
                   <input type="number" min="1" value={formData.bottles} onChange={(e) => setFormData({ ...formData, bottles: e.target.value })} required />
                 </div>
+{formData.transactionType !== 'Donacion' && (
                 <div className="form-group">
                   <label>Precio Unitario (Q)</label>
                   <div className="input-with-suffix">
@@ -436,6 +438,7 @@ const Pedidos = () => {
                     <span className="input-suffix">Q</span>
                   </div>
                 </div>
+)}
                 {formData.transactionType !== 'Donacion' && (
                   <div className="order-total-box form-group--full">
                     <div className="order-total-row">

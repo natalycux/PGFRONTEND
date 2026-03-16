@@ -304,7 +304,10 @@ const Comunidades = () => {
                       <div className={`com-community-icon${!c.activa ? ' com-community-icon--inactive' : ''}`}>
                         <Building2 size={17} />
                       </div>
-                      <span className="com-community-name">{c.nombreComunidad}</span>
+                      <div className="com-name-block">
+                        <span className="com-community-name">{c.nombreComunidad}</span>
+                        <span className="com-id-tag">#{c.idComunidad}</span>
+                      </div>
                       {c.activa
                         ? <span className="com-badge com-badge--active">Activa</span>
                         : <span className="com-badge com-badge--inactive">Inactiva</span>

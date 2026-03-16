@@ -289,10 +289,29 @@
 .com-badge--active   { background: #dcfce7; color: #15803d; }
 .com-badge--inactive { background: #f1f5f9; color: #64748b; }
 
+.com-name-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 .com-community-name {
   font-size: 14px;
   font-weight: 600;
   color: #1e293b;
+}
+
+.com-id-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  width: fit-content;
+  min-width: 56px;
+  text-align: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
 }
 
 .com-cell {

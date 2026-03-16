@@ -190,6 +190,7 @@ const Usuarios = () => {
             <div className="user-card-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h3 className="user-name">{user.nombreCompleto}</h3>
+                <span className="user-id-badge">#{user.idUsuario}</span>
                 {user.idUsuario === currentUser.id && (
                   <span className="current-user-badge">Tu</span>
                 )}

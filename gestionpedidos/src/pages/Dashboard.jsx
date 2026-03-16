@@ -216,7 +216,6 @@ const Dashboard = () => {
               <div className="fecha-input-wrap">
                 <input type="date" value={fechaDesde}
                   onChange={e => setFechaDesde(e.target.value)} />
-                <CalendarDays size={16} />
               </div>
             </div>
             <div className="fecha-grupo">
@@ -224,7 +223,6 @@ const Dashboard = () => {
               <div className="fecha-input-wrap">
                 <input type="date" value={fechaHasta}
                   onChange={e => setFechaHasta(e.target.value)} />
-                <CalendarDays size={16} />
               </div>
             </div>
             <button className="limpiar-btn" onClick={limpiarFechas}>✕ Limpiar</button>

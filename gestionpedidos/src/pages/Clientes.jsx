@@ -411,7 +411,10 @@ const Clientes = () => {
                       <div className={`cli-client-icon${!isActive ? ' cli-client-icon--inactive' : ''}`}>
                         <Users size={16} />
                       </div>
-                      <span className="cli-client-name">{client.nombreCompleto}</span>
+                      <div className="cli-name-block">
+                        <span className="cli-client-name">{client.nombreCompleto}</span>
+                        <span className="cli-id-tag">#{client.idCliente}</span>
+                      </div>
                       {isActive
                         ? <span className="cli-badge cli-badge--active">Activo</span>
                         : <span className="cli-badge cli-badge--inactive">Inactivo</span>
