@@ -301,17 +301,18 @@ const Pedidos = () => {
             const cancelInfo = isCancelled ? getCancellationInfo(order) : null;
             return (
               <div key={order.idPedido} className={`order-item${isCancelled ? ' order-item--cancelled' : ''}`}>
-                <div className="order-item-header">
-                  <div className="order-name-row">
-                    <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
-                    {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
+                <div className={`order-id-circle${isCancelled ? ' order-id-circle--cancelled' : ''}`}>#{order.idPedido}</div>
+                <div className="order-content">
+                  <div className="order-item-header">
+                    <div className="order-name-row">
+                      <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
+                      {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
+                    </div>
+                    <div className="order-badges">
+                      {getStatusBadge(order.estadoPedido)}
+                      {getTransactionBadge(order.tipoTransaccion, order.montoDescuento)}
+                    </div>
                   </div>
-                  <p className="order-number-label">Numero de pedido: <span>#{order.idPedido}</span></p>
-                  <div className="order-badges">
-                    {getStatusBadge(order.estadoPedido)}
-                    {getTransactionBadge(order.tipoTransaccion, order.montoDescuento)}
-                  </div>
-                </div>
                 <div className="order-item-details">
                   <div className="detail-item"><MapPin size={14} /><span>{order.direccionDetallada || 'Sin dirección'}</span></div>
                   <div className="detail-item"><Phone size={14} /><span>{order.telefono || 'Sin teléfono'}</span></div>
@@ -379,6 +380,7 @@ const Pedidos = () => {
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             );
           })}

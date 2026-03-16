@@ -175,13 +175,44 @@
 .orders-list { display: flex; flex-direction: column; }
 
 .order-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 20px 4px;
+  padding: 20px 8px;
   transition: background .2s;
 }
 
 .order-item:last-child { border-bottom: none; }
+
+/* Círculo con número de pedido */
+.order-id-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: -.01em;
+}
+
+.order-id-circle--cancelled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+/* Contenido derecho */
+.order-content {
+  flex: 1;
+  min-width: 0;
+}
 
 /* Pedido cancelado: fondo ligeramente gris */
 .order-item--cancelled {
@@ -201,33 +232,6 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0;
-}
-
-.order-number-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 9px;
-  min-width: 56px;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .02em;
-  font-variant-numeric: tabular-nums;
-}
-
-.order-number-label {
-  margin: 0 0 8px 0;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.order-number-label span {
-  color: #1d4ed8;
-  font-variant-numeric: tabular-nums;
 }
 
 .order-client-name.cancelled-name {
