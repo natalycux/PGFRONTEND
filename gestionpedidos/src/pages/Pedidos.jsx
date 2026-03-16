@@ -5,12 +5,27 @@ import {
   communityService, 
   clientService 
 } from '../services/api';
-import { Plus, MapPin, Phone, Calendar, Droplets, ChevronDown, XCircle, AlertCircle } from 'lucide-react';
+import { Plus, MapPin, Phone, Calendar, Droplets, ChevronDown, XCircle, AlertCircle, SlidersHorizontal, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
 import './Pedidos.css';
 
+const toLocalDateInputValue = (date = new Date()) => {
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+};
+
+const normalizeText = (value) => String(value ?? '').trim().toLowerCase();
+
+const formatInputDate = (value) => {
+  if (!value) return '';
+  const [year, month, day] = value.split('-');
+  if (!year || !month || !day) return value;
+  return `${day}/${month}/${year}`;
+};
+
 const Pedidos = () => {
   const { user } = useAuth();
+  const todayValue = toLocalDateInputValue();
   const [orders, setOrders] = useState([]);
   const [communities, setCommunities] = useState([]);
   const [clients, setClients] = useState([]);
@@ -27,6 +42,15 @@ const Pedidos = () => {
 
   // Create modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Advanced filters state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterOrderId, setFilterOrderId] = useState('');
+  const [filterCommunityId, setFilterCommunityId] = useState('');
+  const [filterClientId, setFilterClientId] = useState('');
+  const [filterDateStart, setFilterDateStart] = useState(todayValue);
+  const [filterDateEnd, setFilterDateEnd] = useState(todayValue);
+  const [filterClients, setFilterClients] = useState([]);
 
   const openCreateModal = () => {
     setFormData({
@@ -101,7 +125,37 @@ const Pedidos = () => {
       setClients([]);
     }
   };
+  const handleFilterCommunityChange = async (e) => {
+    const id = e.target.value;
+    setFilterCommunityId(id);
+    setFilterClientId('');
+    if (id) {
+      try {
+        const data = await clientService.getByCommunity(id);
+        setFilterClients(data);
+      } catch {
+        setFilterClients([]);
+      }
+    } else {
+      setFilterClients([]);
+    }
+  };
 
+  const openNativeDatePicker = (e) => {
+    if (typeof e.target.showPicker === 'function') {
+      e.target.showPicker();
+    }
+  };
+
+  const handleClearFilters = () => {
+    setFilter('Todos');
+    setFilterOrderId('');
+    setFilterCommunityId('');
+    setFilterClientId('');
+    setFilterClients([]);
+    setFilterDateStart(todayValue);
+    setFilterDateEnd(todayValue);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -212,13 +266,52 @@ const Pedidos = () => {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    if (filter === 'Todos') return true;
-    if (filter === 'Pendiente') return order.estadoPedido === 'Pendiente';
-    if (filter === 'En Camino') return order.estadoPedido === 'En Camino';
-    if (filter === 'Entregado') return order.estadoPedido === 'Entregado';
-    if (filter === 'Cancelado') return order.estadoPedido === 'Cancelado';
+  const baseFilteredOrders = orders.filter(order => {
+    const selectedCommunity = communities.find(c => String(c.idComunidad) === String(filterCommunityId));
+    const selectedClient = filterClients.find(c => String(c.idCliente) === String(filterClientId));
+    const orderCommunityId = order.idComunidad ?? order.communityId;
+    const orderClientId = order.idCliente ?? order.clientId;
+    const orderCommunityName = normalizeText(order.nombreComunidad ?? order.communityName ?? order.comunidad);
+    const orderClientName = normalizeText(order.nombreCliente ?? order.clientName ?? order.cliente);
+    const selectedCommunityName = normalizeText(selectedCommunity?.nombreComunidad);
+    const selectedClientName = normalizeText(selectedClient?.nombreCompleto);
+
+    // Order ID filter (supports "1, 2, 3")
+    if (filterOrderId.trim()) {
+      const ids = filterOrderId.split(',').map(s => s.trim()).filter(Boolean);
+      if (!ids.some(id => String(order.idPedido) === id)) return false;
+    }
+    // Community filter
+    if (filterCommunityId) {
+      const matchesCommunityId = orderCommunityId != null && String(orderCommunityId) === String(filterCommunityId);
+      const matchesCommunityName = selectedCommunityName && orderCommunityName === selectedCommunityName;
+      if (!matchesCommunityId && !matchesCommunityName) return false;
+    }
+    // Client filter
+    if (filterClientId) {
+      const matchesClientId = orderClientId != null && String(orderClientId) === String(filterClientId);
+      const matchesClientName = selectedClientName && orderClientName === selectedClientName;
+      if (!matchesClientId && !matchesClientName) return false;
+    }
+    // Date range filter
+    if (filterDateStart) {
+      const orderDate = new Date(order.fechaCreacion);
+      const start = new Date(`${filterDateStart}T00:00:00`);
+      start.setHours(0, 0, 0, 0);
+      if (orderDate < start) return false;
+    }
+    if (filterDateEnd) {
+      const orderDate = new Date(order.fechaCreacion);
+      const end = new Date(`${filterDateEnd}T23:59:59`);
+      end.setHours(23, 59, 59, 999);
+      if (orderDate > end) return false;
+    }
     return true;
+  });
+
+  const filteredOrders = baseFilteredOrders.filter(order => {
+    if (filter === 'Todos') return true;
+    return order.estadoPedido === filter;
   });
 
   const getStatusBadge = (status) => {
@@ -259,7 +352,16 @@ const Pedidos = () => {
     return <div className="loading">Cargando pedidos...</div>;
   }
 
-  const countBy = (status) => orders.filter(o => o.estadoPedido === status).length;
+  const countBy = (status) => baseFilteredOrders.filter(o => o.estadoPedido === status).length;
+  const currentDateText = new Date().toLocaleDateString('es-ES');
+  const todayOrdersCount = orders.filter((order) => {
+    const date = new Date(order.fechaCreacion);
+    return toLocalDateInputValue(date) === todayValue;
+  }).length;
+  const isTodayRange = filterDateStart === todayValue && filterDateEnd === todayValue;
+  const rangeText = filterDateStart && filterDateEnd
+    ? `${formatInputDate(filterDateStart)} - ${formatInputDate(filterDateEnd)}`
+    : formatInputDate(filterDateStart || filterDateEnd);
 
   return (
     <div className="pedidos-page">
@@ -269,7 +371,19 @@ const Pedidos = () => {
         <div className="list-header">
           <div>
             <h2 className="section-title">Lista de Pedidos</h2>
-            <p className="orders-count">{filteredOrders.length} pedidos</p>
+            <div className="orders-summary">
+              <p className="orders-count">
+                {filteredOrders.length} {filteredOrders.length === 1 ? 'pedido' : 'pedidos'}
+                {isTodayRange ? ' de hoy' : ' en el filtro actual'}
+              </p>
+              <div className="orders-meta-row">
+                <span className="orders-meta-pill">Fecha actual: {currentDateText}</span>
+                <span className="orders-meta-pill">Pedidos de hoy: {todayOrdersCount}</span>
+                {!isTodayRange && rangeText && (
+                  <span className="orders-meta-pill orders-meta-pill--range">Rango: {rangeText}</span>
+                )}
+              </div>
+            </div>
           </div>
           <button className="create-order-btn" onClick={openCreateModal}>
             <Plus size={18} />
@@ -279,7 +393,7 @@ const Pedidos = () => {
 
         <div className="filter-tabs">
           {[
-            { key: 'Todos',     label: 'Todos',      count: orders.length },
+            { key: 'Todos',     label: 'Todos',      count: baseFilteredOrders.length },
             { key: 'Pendiente', label: 'Pendientes', count: countBy('Pendiente') },
             { key: 'En Camino', label: 'En Camino',  count: countBy('En Camino') },
             { key: 'Entregado', label: 'Entregados', count: countBy('Entregado') },
@@ -294,6 +408,91 @@ const Pedidos = () => {
             </button>
           ))}
         </div>
+
+        {/* ── Botón Filtros Avanzados ── */}
+        <div className="advanced-filters-bar">
+          <button
+            className={`advanced-filters-btn${showFilters ? ' advanced-filters-btn--active' : ''}`}
+            onClick={() => setShowFilters(v => !v)}
+          >
+            <SlidersHorizontal size={15} />
+            Filtros Avanzados
+          </button>
+        </div>
+
+        {/* ── Panel de Filtros ── */}
+        {showFilters && (
+          <div className="advanced-filters-panel">
+            <div className="filters-row filters-row--3">
+              <div className="filter-field">
+                <label className="filter-label"><Search size={14} /> Número de Pedido</label>
+                <input
+                  className="filter-input"
+                  type="text"
+                  placeholder="Ej: 1, 2, 3..."
+                  value={filterOrderId}
+                  onChange={e => setFilterOrderId(e.target.value)}
+                />
+              </div>
+              <div className="filter-field">
+                <label className="filter-label"><MapPin size={14} /> Comunidad</label>
+                <select className="filter-input" value={filterCommunityId} onChange={handleFilterCommunityChange}>
+                  <option value="">Todas las comunidades</option>
+                  {communities.map(c => (
+                    <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-field">
+                <label className="filter-label"><Phone size={14} /> Cliente</label>
+                <select
+                  className="filter-input"
+                  value={filterClientId}
+                  onChange={e => setFilterClientId(e.target.value)}
+                  disabled={!filterCommunityId}
+                >
+                  <option value="">Todos los clientes</option>
+                  {filterClients.map(c => (
+                    <option key={c.idCliente} value={c.idCliente}>{c.nombreCompleto}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="filters-row filters-row--2">
+              <div className="filter-field">
+                <label className="filter-label"><Calendar size={14} /> Fecha Inicial</label>
+                <input
+                  type="date"
+                  className="filter-input"
+                  value={filterDateStart}
+                  onChange={e => setFilterDateStart(e.target.value)}
+                  max={filterDateEnd || undefined}
+                  onFocus={openNativeDatePicker}
+                  onClick={openNativeDatePicker}
+                />
+                <span className="filter-field-hint">Escribir o seleccionar del calendario</span>
+              </div>
+              <div className="filter-field">
+                <label className="filter-label"><Calendar size={14} /> Fecha Final</label>
+                <input
+                  type="date"
+                  className="filter-input"
+                  value={filterDateEnd}
+                  onChange={e => setFilterDateEnd(e.target.value)}
+                  min={filterDateStart || undefined}
+                  onFocus={openNativeDatePicker}
+                  onClick={openNativeDatePicker}
+                />
+                <span className="filter-field-hint">Escribir o seleccionar del calendario</span>
+              </div>
+            </div>
+            <div className="filters-actions">
+              <button type="button" className="clear-filters-btn" onClick={handleClearFilters}>
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="orders-list" ref={dropdownRef}>
           {filteredOrders.map(order => {
