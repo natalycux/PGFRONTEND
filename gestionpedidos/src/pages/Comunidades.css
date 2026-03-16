@@ -247,7 +247,7 @@
   display: grid;
   grid-template-columns: 88px minmax(260px, 1.35fr) 150px 1fr 1fr 132px;
   align-items: center;
-  min-height: 92px;
+  min-height: 82px;
   padding: 14px 24px;
   border-bottom: 1px solid #f1f5f9;
   transition: background .15s;
@@ -267,8 +267,8 @@
 }
 
 .com-number-dot {
-  width: 50px;
-  height: 50px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   background: #dbeafe;
   color: #1d4ed8;
@@ -276,7 +276,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -308,9 +308,9 @@
 
 /* Badge estado */
 .com-badge {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 7px 16px;
+  padding: 5px 12px;
   border-radius: 999px;
   letter-spacing: 0;
   flex-shrink: 0;
@@ -334,13 +334,13 @@
 }
 
 .com-community-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #1e293b;
 }
 
 .com-cell {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #475569;
 }
 
@@ -498,14 +498,14 @@
   }
 
   .com-number-dot {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
   }
 
   .com-badge {
-    padding: 5px 11px;
-    font-size: 11px;
+    padding: 4px 10px;
+    font-size: 10.5px;
   }
 
   .com-page-header { flex-direction: column; }

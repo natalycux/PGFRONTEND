@@ -149,13 +149,22 @@ const Usuarios = () => {
     }
   };
 
-  const getRoleBadge = (role) => {
-    const badges = {
-      'AdminPrincipal': { class: 'admin-principal', icon: <Shield size={14} />, text: 'Administrador Principal' },
-      'AdminSecundario': { class: 'admin-2', icon: <Shield size={14} />, text: 'Administrador 2' },
-      'Repartidor': { class: 'repartidor', icon: '', text: 'Repartidor' }
-    };
-    const badge = badges[role] || { class: '', icon: '', text: role };
+  const getRoleBadge = (user) => {
+    const roleRaw = user?.rol ?? user?.role ?? user?.nombreRol ?? user?.tipoRol;
+    const roleId = user?.idRol ?? user?.id_rol;
+    const roleKey = String(roleRaw ?? '').trim().toLowerCase();
+
+    let badge;
+    if (roleKey.includes('principal') || roleKey === 'adminprincipal' || roleId === 1) {
+      badge = { class: 'admin-principal', icon: <Shield size={14} />, text: 'Administrador Principal' };
+    } else if (roleKey.includes('secundario') || roleKey.includes('admin 2') || roleKey === 'adminsecundario' || roleId === 2) {
+      badge = { class: 'admin-2', icon: <Shield size={14} />, text: 'Administrador 2' };
+    } else if (roleKey.includes('repart') || roleId === 3) {
+      badge = { class: 'repartidor', icon: '', text: 'Repartidor' };
+    } else {
+      badge = { class: 'repartidor', icon: '', text: roleRaw || 'Repartidor' };
+    }
+
     return (
       <span className={`role-badge ${badge.class}`}>
         {badge.icon} {badge.text}
@@ -180,82 +189,68 @@ const Usuarios = () => {
         </button>
       </div>
 
-      <div className="users-count">
-        <h3>Usuarios Registrados ({users.length}) &middot; Activos: {users.filter(u => u.activo !== false).length}</h3>
-      </div>
+      <div className="users-grid-card">
+        <div className="users-list-header">
+          <h3>Usuarios Registrados ({users.length})</h3>
+        </div>
 
-      <div className="users-table-card">
-        <div className="users-table-header">
+        <div className="users-grid-head">
           <span>#</span>
           <span>USUARIO</span>
-          <span>ESTADO</span>
           <span>ROL</span>
+          <span>ESTADO</span>
           <span>CORREO</span>
-          <span>FECHA DE CREACIÓN</span>
+          <span>CREADO</span>
           <span className="col-acciones">ACCIONES</span>
         </div>
 
-        <div className="users-table-body">
+        <div className="users-grid-body">
           {users.map((user) => {
             const isActive = user.activo !== false;
             return (
-              <div key={user.idUsuario} className={`users-table-row${!isActive ? ' users-row-inactive' : ''}`}>
+              <div key={user.idUsuario} className={`users-grid-row${!isActive ? ' users-grid-row--inactive' : ''}`}>
                 <div className="us-cell-id">
                   <span className={`us-number-dot${!isActive ? ' us-number-dot--inactive' : ''}`}>{user.idUsuario}</span>
                 </div>
 
-                <div className="us-cell-name">
+                <div className="users-grid-user">
                   <span className="user-name">{user.nombreCompleto}</span>
-                  {user.idUsuario === currentUser.id && (
-                    <span className="current-user-badge">Tu</span>
-                  )}
+                  {user.idUsuario === currentUser.id && <span className="current-user-badge">Tú</span>}
                 </div>
 
-                <div className="us-cell-status">
-                  {isActive
-                    ? <span className="us-status-badge us-status-badge--active">Activo</span>
-                    : <span className="us-status-badge us-status-badge--inactive">Inactivo</span>
-                  }
+                <div className="users-grid-role">{getRoleBadge(user)}</div>
+
+                <div className="users-grid-status">
+                  <span className={`user-status-badge${isActive ? ' user-status-badge--active' : ' user-status-badge--inactive'}`}>
+                    {isActive ? 'Activo' : 'Inactivo'}
+                  </span>
                 </div>
 
-                <div className="us-cell-role">{getRoleBadge(user.rol)}</div>
                 <span className="user-email">{user.email}</span>
                 <span className="user-created">{new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</span>
 
-                <div className="user-actions">
-                  <button
-                    onClick={() => handleOpenEdit(user)}
-                    className="action-icon-btn edit"
-                    title="Editar usuario"
-                  >
-                    <Pencil size={16} />
+                <div className="users-grid-actions">
+                  <button onClick={() => handleOpenEdit(user)} className="users-icon-btn users-icon-btn--edit" title="Editar usuario">
+                    <Pencil size={15} />
                   </button>
 
                   <button
                     onClick={() => handleChangePassword(user.idUsuario)}
-                    className={`action-icon-btn change-password${!isActive ? ' deactivate-disabled' : ''}`}
+                    className={`users-icon-btn users-icon-btn--password${!isActive ? ' users-icon-btn--disabled' : ''}`}
                     disabled={!isActive}
                     title={!isActive ? 'Usuario desactivado' : 'Cambiar contraseña'}
                   >
-                    <Key size={16} />
+                    <Key size={15} />
                   </button>
 
                   {user.idUsuario !== currentUser.id && (
                     !isActive ? (
-                      <button
-                        onClick={() => handleReactivate(user.idUsuario)}
-                        className="action-icon-btn reactivate"
-                        title="Reactivar usuario"
-                      >
-                        <UserCheck size={16} />
+                      <button onClick={() => handleReactivate(user.idUsuario)} className="users-icon-btn users-icon-btn--reactivate" title="Reactivar usuario">
+                        <UserCheck size={15} />
                       </button>
                     ) : (
-                      <button
-                        onClick={() => handleDeactivate(user.idUsuario, user.activo)}
-                        className="action-icon-btn deactivate"
-                        title="Desactivar usuario"
-                      >
-                        <UserX size={16} />
+                      <button onClick={() => handleDeactivate(user.idUsuario, user.activo)} className="users-icon-btn users-icon-btn--deactivate" title="Desactivar usuario">
+                        <UserX size={15} />
                       </button>
                     )
                   )}
