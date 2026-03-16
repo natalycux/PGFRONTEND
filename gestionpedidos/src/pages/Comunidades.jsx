@@ -281,7 +281,9 @@ const Comunidades = () => {
       {/* ── Tabla ── */}
       <div className="com-table-card">
         <div className="com-table-header">
+          <span>#</span>
           <span>COMUNIDAD</span>
+          <span>ESTADO</span>
           <span>CREADA POR</span>
           <span>FECHA DE CREACIÓN</span>
           <span className="col-acciones">ACCIONES</span>
@@ -300,17 +302,21 @@ const Comunidades = () => {
                 {/* Fila normal */}
                 {editingId !== c.idComunidad && (
                   <div className={`com-table-row${!c.activa ? ' com-row--inactive' : ''}`}>
+                    <div className="com-cell-id">
+                      <span className={`com-number-dot${!c.activa ? ' com-number-dot--inactive' : ''}`}>{c.idComunidad}</span>
+                    </div>
                     <div className="com-cell-name">
                       <div className={`com-community-icon${!c.activa ? ' com-community-icon--inactive' : ''}`}>
                         <Building2 size={17} />
                       </div>
                       <div className="com-name-block">
                         <span className="com-community-name">{c.nombreComunidad}</span>
-                        <span className="com-id-tag">#{c.idComunidad}</span>
                       </div>
+                    </div>
+                    <div className="com-cell-status">
                       {c.activa
-                        ? <span className="com-badge com-badge--active">Activa</span>
-                        : <span className="com-badge com-badge--inactive">Inactiva</span>
+                        ? <span className="com-badge com-badge--active">Activo</span>
+                        : <span className="com-badge com-badge--inactive">Inactivo</span>
                       }
                     </div>
                     <span className="com-cell">{c.creadoPor || c.nombreCreador || getUserName(c.idUsuarioCreador ?? c.id_usuario_creador)}</span>
@@ -355,6 +361,9 @@ const Comunidades = () => {
                 {/* Fila en modo edición */}
                 {editingId === c.idComunidad && (
                   <div className="com-table-row com-row--editing">
+                    <div className="com-cell-id">
+                      <span className="com-number-dot">{c.idComunidad}</span>
+                    </div>
                     <div className="com-edit-inline">
                       <input
                         className={`com-input com-input--inline${editError ? ' com-input--error' : ''}`}
@@ -363,6 +372,12 @@ const Comunidades = () => {
                         autoFocus
                       />
                       {editError && <p className="com-field-error">{editError}</p>}
+                    </div>
+                    <div className="com-cell-status">
+                      {c.activa
+                        ? <span className="com-badge com-badge--active">Activo</span>
+                        : <span className="com-badge com-badge--inactive">Inactivo</span>
+                      }
                     </div>
                     <span className="com-cell">{c.creadoPor || c.nombreCreador || getUserName(c.idUsuarioCreador ?? c.id_usuario_creador)}</span>
                     <span className="com-cell">

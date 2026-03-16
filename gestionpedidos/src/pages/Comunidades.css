@@ -227,7 +227,7 @@
 
 .com-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 140px;
+  grid-template-columns: 88px minmax(260px, 1.35fr) 150px 1fr 1fr 132px;
   padding: 12px 24px;
   font-size: 11.5px;
   font-weight: 700;
@@ -239,13 +239,15 @@
 }
 
 .col-acciones { text-align: right; }
+.com-table-header span:first-child { text-align: center; }
 
 .com-table-body {}
 
 .com-table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 140px;
+  grid-template-columns: 88px minmax(260px, 1.35fr) 150px 1fr 1fr 132px;
   align-items: center;
+  min-height: 92px;
   padding: 14px 24px;
   border-bottom: 1px solid #f1f5f9;
   transition: background .15s;
@@ -258,10 +260,37 @@
 .com-table-row.com-row--editing { background: #eff6ff; align-items: start; padding-top: 16px; padding-bottom: 16px; }
 
 /* Celda nombre */
+.com-cell-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.com-number-dot {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.com-number-dot--inactive {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
 .com-cell-name {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .com-community-icon {
@@ -279,15 +308,24 @@
 
 /* Badge estado */
 .com-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 20px;
-  letter-spacing: .3px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 999px;
+  letter-spacing: 0;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.com-badge--active   { background: #dcfce7; color: #15803d; }
-.com-badge--inactive { background: #f1f5f9; color: #64748b; }
+.com-badge--active   { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.com-badge--inactive { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+.com-cell-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .com-name-block {
   display: flex;
@@ -296,26 +334,13 @@
 }
 
 .com-community-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #1e293b;
 }
 
-.com-id-tag {
-  font-size: 11px;
-  font-weight: 700;
-  color: #2563eb;
-  background: #eff6ff;
-  width: fit-content;
-  min-width: 56px;
-  text-align: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-variant-numeric: tabular-nums;
-}
-
 .com-cell {
-  font-size: 13.5px;
+  font-size: 14px;
   color: #475569;
 }
 
@@ -462,12 +487,25 @@
 @media (max-width: 768px) {
   .com-table-header,
   .com-table-row {
-    grid-template-columns: 1fr 1fr 80px;
+    grid-template-columns: 72px 1fr 118px 104px;
   }
 
-  .com-table-header span:nth-child(3),
-  .com-table-row .com-cell:nth-child(3) {
+  .com-table-header span:nth-child(4),
+  .com-table-header span:nth-child(5),
+  .com-table-row > *:nth-child(4),
+  .com-table-row > *:nth-child(5) {
     display: none;
+  }
+
+  .com-number-dot {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .com-badge {
+    padding: 5px 11px;
+    font-size: 11px;
   }
 
   .com-page-header { flex-direction: column; }
