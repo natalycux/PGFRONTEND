@@ -62,6 +62,11 @@ const Clientes = () => {
   const filtered = filterCommunity
     ? clients.filter(c => String(c.idComunidad) === filterCommunity)
     : clients;
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    const aId = Number(a.idCliente ?? a.id ?? 0);
+    const bId = Number(b.idCliente ?? b.id ?? 0);
+    return aId - bId;
+  });
 
   // ── Crear ──────────────────────────────────────────────────────
   const openForm = () => {
@@ -393,7 +398,7 @@ const Clientes = () => {
           <span className="col-acciones">ACCIONES</span>
         </div>
 
-        {filtered.length === 0 ? (
+        {sortedFiltered.length === 0 ? (
           <div className="cli-empty-state">
             <Users size={48} className="cli-empty-icon" />
             <p className="cli-empty-title">No hay clientes registrados</p>
@@ -401,7 +406,7 @@ const Clientes = () => {
           </div>
         ) : (
           <div className="cli-table-body">
-            {filtered.map((client) => (
+            {sortedFiltered.map((client) => (
               <div key={client.idCliente}>
 
                 {/* Fila normal */}

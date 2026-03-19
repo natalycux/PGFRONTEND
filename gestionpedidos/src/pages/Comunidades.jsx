@@ -192,6 +192,11 @@ const Comunidades = () => {
 
   const activeCount   = communities.filter(c => c.activa).length;
   const inactiveCount = communities.filter(c => !c.activa).length;
+  const sortedCommunities = [...communities].sort((a, b) => {
+    const aId = Number(a.idComunidad ?? a.id ?? 0);
+    const bId = Number(b.idComunidad ?? b.id ?? 0);
+    return aId - bId;
+  });
 
   if (loading) return <div className="loading">Cargando comunidades...</div>;
 
@@ -289,7 +294,7 @@ const Comunidades = () => {
           <span className="col-acciones">ACCIONES</span>
         </div>
 
-        {communities.length === 0 ? (
+        {sortedCommunities.length === 0 ? (
           <div className="com-empty-state">
             <Building2 size={48} className="com-empty-icon" />
             <p className="com-empty-title">No hay comunidades registradas</p>
@@ -297,7 +302,7 @@ const Comunidades = () => {
           </div>
         ) : (
           <div className="com-table-body">
-            {communities.map((c) => (
+            {sortedCommunities.map((c) => (
               <div key={c.idComunidad}>
                 {/* Fila normal */}
                 {editingId !== c.idComunidad && (
