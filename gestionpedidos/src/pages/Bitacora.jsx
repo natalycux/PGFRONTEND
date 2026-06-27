@@ -88,12 +88,13 @@ const CalendarPicker = ({ selectedDate, onChange, onClose }) => {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 const Bitacora = () => {
+  const initialToday = new Date();
   const [rawLogs, setRawLogs] = useState([]);
   const [totalLogs, setTotalLogs] = useState(0);
   const [clientsMap, setClientsMap] = useState({});
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate]     = useState(null);
+  const [startDate, setStartDate] = useState(initialToday);
+  const [endDate, setEndDate]     = useState(initialToday);
   const [showStartCal, setShowStartCal] = useState(false);
   const [showEndCal,   setShowEndCal]   = useState(false);
   const startRef = useRef(null);
@@ -167,8 +168,8 @@ const Bitacora = () => {
   const stats = {
     total:    filteredLogs.length,
     logins:   filteredLogs.filter(l => l.accion === 'LOGIN').length,
-    pedidos:  filteredLogs.filter(l => ['CREAR_PEDIDO','ACTUALIZACION_PEDIDO','ACTUALIZAR_ESTADO','ELIMINAR_PEDIDO'].includes(l.accion)).length,
-    usuarios: filteredLogs.filter(l => ['CREAR_USUARIO','DESACTIVAR_USUARIO','CAMBIO_PASSWORD','EDITAR_USUARIO','ACTIVAR_USUARIO','CAMBIAR_CONTRASENA'].includes(l.accion)).length,
+    pedidos:  filteredLogs.filter(l => l.accion === 'CREAR_PEDIDO').length,
+    usuarios: filteredLogs.filter(l => l.accion === 'CREAR_USUARIO').length,
   };
 
   // ── Agrupado por fecha ──────────────────────────────────────────────────────

@@ -77,6 +77,23 @@ const Comunidades = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newName.trim()) { setCreateError('El nombre es obligatorio.'); return; }
+    
+    // Validar si ya existe una comunidad con ese nombre
+    const nombreLower = newName.trim().toLowerCase();
+    const exists = communities.some(
+      (c) => c.nombreComunidad?.toLowerCase() === nombreLower
+    );
+    if (exists) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Comunidad existente',
+        text: `La comunidad "${newName.trim()}" ya existe en el sistema.`,
+        confirmButtonColor: '#ea580c',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+
     setCreateLoading(true);
     try {
       await communityService.create(newName.trim(), user?.id);
@@ -94,7 +111,7 @@ const Comunidades = () => {
       try {
         const data = await communityService.getAll();
         const wasCreated = data.some(
-          (c) => c.nombreComunidad?.toLowerCase() === newName.trim().toLowerCase()
+          (c) => c.nombreComunidad?.toLowerCase() === nombreLower
         );
         if (wasCreated) {
           setCommunities(data);

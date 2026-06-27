@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Droplets, Mail, Lock } from 'lucide-react';
@@ -9,9 +9,16 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
+
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const destination = user?.idRol === 3 ? '/pedidos' : '/dashboard';
+      navigate(destination, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,13 +26,11 @@ const Login = () => {
     setLoading(true);
 
     const result = await login(email, password);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
+
+    if (!result.success) {
       setError(result.error);
     }
-    
+
     setLoading(false);
   };
 

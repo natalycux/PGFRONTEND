@@ -240,6 +240,7 @@
 
 .col-acciones { text-align: right; }
 .com-table-header span:first-child { text-align: center; }
+.com-table-header span:nth-child(3) { text-align: center; }
 
 .com-table-body {}
 

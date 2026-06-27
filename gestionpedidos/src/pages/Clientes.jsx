@@ -93,6 +93,25 @@ const Clientes = () => {
     e.preventDefault();
     const errs = validateForm(formData);
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
+    
+    // Validar si ya existe un cliente con ese nombre en esa comunidad
+    const nombreLower = formData.nombre.trim().toLowerCase();
+    const comunidadId = String(formData.communityId);
+    const exists = clients.some(
+      (c) => c.nombreCompleto?.toLowerCase() === nombreLower &&
+             String(c.idComunidad) === comunidadId
+    );
+    if (exists) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Cliente existente',
+        text: `El cliente "${formData.nombre.trim()}" ya existe en esta comunidad.`,
+        confirmButtonColor: '#ea580c',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+
     setCreateLoading(true);
     try {
       await clientService.create({

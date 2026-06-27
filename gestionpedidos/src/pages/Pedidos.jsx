@@ -51,6 +51,8 @@ const Pedidos = () => {
   const [filterDateStart, setFilterDateStart] = useState(todayValue);
   const [filterDateEnd, setFilterDateEnd] = useState(todayValue);
   const [filterClients, setFilterClients] = useState([]);
+  const isRepartidor = user?.idRol === 3;
+  const currentUserId = String(user?.id ?? '');
 
   const openCreateModal = () => {
     setFormData({
@@ -98,12 +100,26 @@ const Pedidos = () => {
 
   const loadInitialData = async () => {
     try {
-      const [ordersData, communitiesData] = await Promise.all([
-        orderService.getAll(),
+      const orderFilters = isRepartidor && user?.id
+        ? { deliveryPersonId: user.id }
+        : {};
+      const [ordersResult, communitiesResult] = await Promise.allSettled([
+        orderService.getAll(orderFilters),
         communityService.getAll()
       ]);
-      setOrders(ordersData);
-      setCommunities(communitiesData);
+
+      if (ordersResult.status === 'fulfilled') {
+        setOrders(ordersResult.value);
+      } else {
+        console.error('Error cargando pedidos:', ordersResult.reason?.response?.status);
+      }
+
+      if (communitiesResult.status === 'fulfilled') {
+        setCommunities(communitiesResult.value);
+      } else {
+        const status = communitiesResult.reason?.response?.status;
+        console.error('Error cargando comunidades — HTTP', status, '— Verifica permisos del backend para rol Repartidor.');
+      }
     } catch (error) {
       console.error('âŒ Error cargando datos:', error);
     } finally {
@@ -147,6 +163,83 @@ const Pedidos = () => {
     }
   };
 
+  const getOrderDeliveryPersonId = (order) => (
+    order.deliveryPersonId ??
+    order.idRepartidor ??
+    order.idUsuarioRepartidor ??
+    order.repartidorId ??
+    order.idUsuario
+  );
+
+  const getOrderDeliveryPersonName = (order) => normalizeText(
+    order.deliveryPersonName ?? order.nombreRepartidor ?? order.repartidor
+  );
+
+  const isOrderOwnedByCurrentUser = (order) => {
+    if (!isRepartidor) return true;
+
+    const orderDeliveryPersonId = getOrderDeliveryPersonId(order);
+    const hasDeliveryId = orderDeliveryPersonId != null && String(orderDeliveryPersonId).trim() !== '';
+    if (hasDeliveryId) {
+      return String(orderDeliveryPersonId) === currentUserId;
+    }
+
+    const orderDeliveryPersonName = getOrderDeliveryPersonName(order);
+    const currentUserName = normalizeText(user?.nombre);
+    if (orderDeliveryPersonName && currentUserName) {
+      return orderDeliveryPersonName === currentUserName;
+    }
+
+    // Si no se puede determinar propietario, bloquear para repartidor por seguridad.
+    return false;
+  };
+
+  const getApiErrorDetails = (error, actionLabel) => {
+    const status = error?.response?.status;
+    const backendMsg =
+      error?.response?.data?.message ||
+      error?.response?.data?.title ||
+      (typeof error?.response?.data === 'string' ? error.response.data : null);
+
+    if (status === 401) {
+      return {
+        title: 'Sesión expirada',
+        text: backendMsg || 'Tu sesión venció. Inicia sesión nuevamente.',
+        confirmButtonColor: '#dc2626'
+      };
+    }
+
+    if (status === 403) {
+      return {
+        title: 'Acceso denegado',
+        text: backendMsg || `No tienes permisos para ${actionLabel}.`,
+        confirmButtonColor: '#dc2626'
+      };
+    }
+
+    if (status === 404) {
+      return {
+        title: 'Recurso no encontrado',
+        text: backendMsg || 'El pedido ya no existe o no fue encontrado.',
+        confirmButtonColor: '#dc2626'
+      };
+    }
+
+    if (status === 409) {
+      return {
+        title: 'Conflicto de estado',
+        text: backendMsg || 'El pedido cambió de estado y no se pudo completar la operación.',
+        confirmButtonColor: '#dc2626'
+      };
+    }
+
+    return {
+      title: `Error al ${actionLabel}`,
+      text: backendMsg || error?.message || 'Ocurrió un error inesperado.',
+      confirmButtonColor: '#dc2626'
+    };
+  };
+
   const handleClearFilters = () => {
     setFilter('Todos');
     setFilterOrderId('');
@@ -158,13 +251,37 @@ const Pedidos = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar si ya existe un pedido idéntico pendiente (mismo cliente, comunidad y transacción)
+    const clientId = parseInt(formData.clientId);
+    const communityId = parseInt(formData.communityId);
+    const transactionType = formData.transactionType;
+    
+    const duplicateOrder = orders.some(order => 
+      order.idCliente === clientId &&
+      order.idComunidad === communityId &&
+      order.tipoTransaccion === transactionType &&
+      order.estadoPedido === 'Pendiente'
+    );
+    
+    if (duplicateOrder) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Pedido duplicado',
+        text: 'Ya existe un pedido pendiente idéntico para este cliente. Verifica los pedidos existentes.',
+        confirmButtonColor: '#ea580c',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+
     try {
       const orderData = {
-        idComunidad: parseInt(formData.communityId),
-        idCliente: parseInt(formData.clientId),
-        tipoTransaccion: formData.transactionType,
+        idComunidad: communityId,
+        idCliente: clientId,
+        tipoTransaccion: transactionType,
         cantidadGarrafones: parseInt(formData.bottles) || 1,
-        precioUnitario: formData.transactionType === 'Donacion' ? 0 : (parseFloat(formData.unitPrice) || 0),
+        precioUnitario: transactionType === 'Donacion' ? 0 : (parseFloat(formData.unitPrice) || 0),
         montoDescuento: 0,
         estadoInicial: formData.initialStatus,
         notasAdicionales: formData.notes || ''
@@ -194,32 +311,57 @@ const Pedidos = () => {
     } catch (error) {
       console.error('Error creando pedido status:', error.response?.status);
       console.error('Error respuesta completa:', JSON.stringify(error.response?.data));
-      const msg = error.response?.data?.message
-        || error.response?.data?.title
-        || (typeof error.response?.data === 'string' ? error.response.data : null)
-        || error.message;
+      const apiError = getApiErrorDetails(error, 'crear el pedido');
       Swal.fire({
         icon: 'error',
-        title: 'Error al crear el pedido',
-        text: msg,
-        confirmButtonColor: '#dc2626',
+        title: apiError.title,
+        text: apiError.text,
+        confirmButtonColor: apiError.confirmButtonColor,
         confirmButtonText: 'Cerrar'
       });
     }
   };
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (order, newStatus) => {
+    if (!isOrderOwnedByCurrentUser(order)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acción no permitida',
+        text: 'Solo puedes cambiar el estado de tus propios pedidos.',
+        confirmButtonColor: '#2563eb'
+      });
+      return;
+    }
+
     setOpenDropdownId(null);
     try {
-      await orderService.updateStatus(orderId, newStatus);
+      await orderService.updateStatus(order.idPedido, newStatus);
     } catch (error) {
       console.warn('âš ï¸ Error en respuesta:', error.response?.status);
+      const apiError = getApiErrorDetails(error, 'cambiar el estado');
+      Swal.fire({
+        icon: 'error',
+        title: apiError.title,
+        text: apiError.text,
+        confirmButtonColor: apiError.confirmButtonColor,
+        confirmButtonText: 'Cerrar'
+      });
     } finally {
       await loadInitialData();
     }
   };
 
   const openCancelModal = (order) => {
+    if (!isOrderOwnedByCurrentUser(order)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acción no permitida',
+        text: 'Solo puedes cancelar tus propios pedidos.',
+        confirmButtonColor: '#2563eb'
+      });
+      return;
+    }
+
     setCancelModal({ open: true, order });
     setCancelReason('');
     setCancelReasonError(false);
@@ -254,11 +396,12 @@ const Pedidos = () => {
       });
     } catch (error) {
       console.error('Error cancelando pedido:', error);
+      const apiError = getApiErrorDetails(error, 'cancelar el pedido');
       Swal.fire({
         icon: 'error',
-        title: 'Error al cancelar',
-        text: error.response?.data?.message || error.message,
-        confirmButtonColor: '#dc2626',
+        title: apiError.title,
+        text: apiError.text,
+        confirmButtonColor: apiError.confirmButtonColor,
         confirmButtonText: 'Cerrar'
       });
     } finally {
@@ -271,10 +414,24 @@ const Pedidos = () => {
     const selectedClient = filterClients.find(c => String(c.idCliente) === String(filterClientId));
     const orderCommunityId = order.idComunidad ?? order.communityId;
     const orderClientId = order.idCliente ?? order.clientId;
+    const orderDeliveryPersonId = getOrderDeliveryPersonId(order);
     const orderCommunityName = normalizeText(order.nombreComunidad ?? order.communityName ?? order.comunidad);
     const orderClientName = normalizeText(order.nombreCliente ?? order.clientName ?? order.cliente);
+    const orderDeliveryPersonName = getOrderDeliveryPersonName(order);
     const selectedCommunityName = normalizeText(selectedCommunity?.nombreComunidad);
     const selectedClientName = normalizeText(selectedClient?.nombreCompleto);
+    const currentUserName = normalizeText(user?.nombre);
+
+    // Repartidor: solo puede ver sus pedidos
+    if (isRepartidor) {
+      const hasDeliveryId = orderDeliveryPersonId != null && String(orderDeliveryPersonId).trim() !== '';
+      if (hasDeliveryId && String(orderDeliveryPersonId) !== currentUserId) return false;
+
+      const hasDeliveryName = orderDeliveryPersonName !== '';
+      if (!hasDeliveryId && hasDeliveryName && currentUserName && orderDeliveryPersonName !== currentUserName) {
+        return false;
+      }
+    }
 
     // Order ID filter (supports "1, 2, 3")
     if (filterOrderId.trim()) {
@@ -379,6 +536,9 @@ const Pedidos = () => {
               <div className="orders-meta-row">
                 <span className="orders-meta-pill">Fecha actual: {currentDateText}</span>
                 <span className="orders-meta-pill">Pedidos de hoy: {todayOrdersCount}</span>
+                {isRepartidor && (
+                  <span className="orders-meta-pill orders-meta-pill--range">Vista: Mis pedidos</span>
+                )}
                 {!isTodayRange && rangeText && (
                   <span className="orders-meta-pill orders-meta-pill--range">Rango: {rangeText}</span>
                 )}
@@ -410,18 +570,20 @@ const Pedidos = () => {
         </div>
 
         {/* ── Botón Filtros Avanzados ── */}
-        <div className="advanced-filters-bar">
-          <button
-            className={`advanced-filters-btn${showFilters ? ' advanced-filters-btn--active' : ''}`}
-            onClick={() => setShowFilters(v => !v)}
-          >
-            <SlidersHorizontal size={15} />
-            Filtros Avanzados
-          </button>
-        </div>
+        {!isRepartidor && (
+          <div className="advanced-filters-bar">
+            <button
+              className={`advanced-filters-btn${showFilters ? ' advanced-filters-btn--active' : ''}`}
+              onClick={() => setShowFilters(v => !v)}
+            >
+              <SlidersHorizontal size={15} />
+              Filtros Avanzados
+            </button>
+          </div>
+        )}
 
         {/* ── Panel de Filtros ── */}
-        {showFilters && (
+        {!isRepartidor && showFilters && (
           <div className="advanced-filters-panel">
             <div className="filters-row filters-row--3">
               <div className="filter-field">
@@ -506,7 +668,10 @@ const Pedidos = () => {
                 <div className="order-content">
                   <div className="order-item-header">
                     <div className="order-name-row">
-                      <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
+                      <div className="order-client-and-community">
+                        <h3 className={`order-client-name${isCancelled ? ' cancelled-name' : ''}`}>{order.nombreCliente}</h3>
+                        <span className="order-community-label">📍 {order.nombreComunidad || 'Sin comunidad'}</span>
+                      </div>
                       {isCancelled && <span className="cancelled-icon" title="Cancelado">🚫</span>}
                       {isDelivered && <span className="delivered-icon" title="Entregado">✅</span>}
                     </div>
@@ -573,7 +738,7 @@ const Pedidos = () => {
                       {openDropdownId === order.idPedido && (
                         <div className="status-dropdown-menu">
                           {['Pendiente', 'En Camino', 'Entregado'].map(s => (
-                            <button key={s} className={`status-dropdown-option${order.estadoPedido === s ? ' active' : ''}`} onClick={() => handleStatusChange(order.idPedido, s)}>{s}</button>
+                            <button key={s} className={`status-dropdown-option${order.estadoPedido === s ? ' active' : ''}`} onClick={() => handleStatusChange(order, s)}>{s}</button>
                           ))}
                         </div>
                       )}

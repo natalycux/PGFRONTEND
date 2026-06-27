@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -10,33 +11,19 @@ import Usuarios from './pages/Usuarios';
 import Bitacora from './pages/Bitacora';
 import './App.css';
 
-// Componente para proteger rutas
-const ProtectedRoute = ({ children, permission }) => {
-  const { isAuthenticated, hasPermission, loading } = useAuth();
-  
-  if (loading) {
-    return <div className="loading">Cargando...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (permission && !hasPermission(permission)) {
-    return <Navigate to="/pedidos" replace />;
-  }
-  
-  return children;
-};
+function DefaultRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user?.idRol === 3 ? '/pedidos' : '/dashboard'} replace />;
+}
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
   
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+      <Route
+        path="/login"
+        element={isAuthenticated ? <DefaultRedirect /> : <Login />}
       />
       
       <Route 
@@ -47,21 +34,21 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        
-        <Route 
-          path="dashboard" 
+        <Route index element={<DefaultRedirect />} />
+
+        <Route
+          path="dashboard"
           element={
-            <ProtectedRoute permission="dashboard">
+            <ProtectedRoute requiredRole={[1, 2]}>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
         
         <Route 
           path="pedidos" 
           element={
-            <ProtectedRoute permission="pedidos">
+            <ProtectedRoute requiredRole={[1, 2, 3]}>
               <Pedidos />
             </ProtectedRoute>
           } 
@@ -70,7 +57,7 @@ function AppRoutes() {
         <Route
           path="comunidades"
           element={
-            <ProtectedRoute permission="comunidades">
+            <ProtectedRoute requiredRole={[1, 2]}>
               <Comunidades />
             </ProtectedRoute>
           }
@@ -79,7 +66,7 @@ function AppRoutes() {
         <Route
           path="clientes"
           element={
-            <ProtectedRoute permission="clientes">
+            <ProtectedRoute requiredRole={[1, 2]}>
               <Clientes />
             </ProtectedRoute>
           }
@@ -88,7 +75,7 @@ function AppRoutes() {
         <Route 
           path="usuarios" 
           element={
-            <ProtectedRoute permission="usuarios">
+            <ProtectedRoute requiredRole={[1, 2]}>
               <Usuarios />
             </ProtectedRoute>
           } 
@@ -97,7 +84,7 @@ function AppRoutes() {
         <Route 
           path="bitacora" 
           element={
-            <ProtectedRoute permission="bitacora">
+            <ProtectedRoute requiredRole={[1, 2]}>
               <Bitacora />
             </ProtectedRoute>
           } 

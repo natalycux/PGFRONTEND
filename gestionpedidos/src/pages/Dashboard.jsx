@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import { dashboardService } from '../services/api';
 import {
-  Package, Clock, Truck, CheckCircle,
+  Package, Clock, Truck, CheckCircle, XCircle,
   DollarSign, Gift, Percent, Droplets,
   Calendar, MapPin, Phone, CalendarDays
 } from 'lucide-react';
@@ -241,7 +241,7 @@ const Dashboard = () => {
       ) : (
         <>
           {/* Fila 1 */}
-          <div className="stats-grid stats-row-4">
+          <div className="stats-grid stats-row-5">
             <div className="stat-card">
               <div className="stat-icon blue"><Package size={22} /></div>
               <div className="stat-content">
@@ -268,6 +268,13 @@ const Dashboard = () => {
               <div className="stat-content">
                 <p className="stat-label">Entregados</p>
                 <h2 className="stat-value">{statistics?.deliveredOrders ?? 0}</h2>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon red"><XCircle size={22} /></div>
+              <div className="stat-content">
+                <p className="stat-label">Cancelados</p>
+                <h2 className="stat-value">{statistics?.cancelledOrders ?? 0}</h2>
               </div>
             </div>
           </div>

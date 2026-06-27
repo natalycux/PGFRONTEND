@@ -190,6 +190,7 @@
   gap: 16px;
 }
 
+.stats-row-5 { grid-template-columns: repeat(5, 1fr); }
 .stats-row-4 { grid-template-columns: repeat(4, 1fr); }
 .stats-row-3 { grid-template-columns: repeat(3, 1fr); }
 .stats-row-2 { grid-template-columns: repeat(2, 1fr); }
@@ -226,6 +227,7 @@
 .stat-icon.yellow { background: #fef3c7; color: #d97706; }
 .stat-icon.orange { background: #ffedd5; color: #ea580c; }
 .stat-icon.green  { background: #d1fae5; color: #059669; }
+.stat-icon.red    { background: #fee2e2; color: #dc2626; }
 .stat-icon.indigo { background: #e0e7ff; color: #4f46e5; }
 .stat-icon.purple { background: #f3e8ff; color: #9333ea; }
 .stat-icon.teal   { background: #ccfbf1; color: #0d9488; }
@@ -413,10 +415,12 @@
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
+  .stats-row-5,
   .stats-row-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {
+  .stats-row-5,
   .stats-row-4,
   .stats-row-3,
   .stats-row-2 { grid-template-columns: 1fr 1fr; }

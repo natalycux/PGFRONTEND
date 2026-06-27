@@ -285,6 +285,7 @@
 
 .cli-table-header .col-acciones { text-align: right; }
 .cli-table-header span:first-child { text-align: center; }
+.cli-table-header span:nth-child(3) { text-align: center; }
 
 .cli-table-row {
   display: grid;

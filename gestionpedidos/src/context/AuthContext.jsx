@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -30,32 +30,77 @@ export function AuthProvider({ children }) {
   });
   const [loading] = useState(false);
 
+  // Escuchar el evento del interceptor cuando el backend devuelve 401
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      console.warn('⚠️ Sesión expirada o token rechazado por el backend. Cerrando sesión...');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, []);
+
   const login = async (email, password) => {
     try {
       console.log('🔐 Intentando login con:', email);
       const response = await authService.login(email, password);
-      console.log('📥 Respuesta del servidor:', response);
+      console.log('📥 Respuesta del servidor COMPLETA:', response);
+      console.log('📥 Headers de respuesta:', response.headers);
       
-      const { token, idusuario, nombreCompleto, email: userEmail, rol, idRol } = response;
+      // Soportar ambas estructuras de respuesta
+      let token, userData;
       
-      if (!token) {
-        console.error('❌ Respuesta inválida - token faltante');
+      // Caso 1: Respuesta con estructura { token, user }
+      if (response.token && response.user) {
+        token = response.token;
+        const roleMap = {
+          'Administrador Principal': 1,
+          'Administrador 2': 2,
+          'Repartidor': 3
+        };
+        userData = {
+          id: response.user.id,
+          nombre: response.user.name,
+          email: response.user.email,
+          rol: response.user.role,
+          idRol: roleMap[response.user.role] || 3
+        };
+      }
+      // Caso 2: Respuesta con estructura { idUsuario, nombreCompleto, ... }
+      else if (response.idUsuario || response.nombreCompleto) {
+        // El token viene en la respuesta también
+        token = response.token || response.accessToken;
+        userData = {
+          id: response.idUsuario,
+          nombre: response.nombreCompleto,
+          email: response.email,
+          rol: response.rol || 'Administrador Sistema',
+          idRol: response.idRol || 1
+        };
+      }
+      else {
+        console.error('❌ Estructura de respuesta no reconocida:', response);
         return { 
           success: false, 
           error: 'Respuesta del servidor inválida' 
         };
       }
       
-      // Crear objeto de usuario con la estructura de la API
-      const userData = {
-        id: idusuario,
-        nombre: nombreCompleto,
-        email: userEmail,
-        rol: rol,
-        idRol: idRol
-      };
+      if (!token) {
+        console.error('❌ Token no encontrado en la respuesta');
+        console.error('Claves disponibles:', Object.keys(response));
+        return { 
+          success: false, 
+          error: 'No se recibió token del servidor' 
+        };
+      }
       
       console.log('✅ Login exitoso, guardando datos...');
+      console.log('Token:', token.substring(0, 20) + '...');
+      console.log('Usuario:', userData);
+      
       // Guardar en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -84,12 +129,31 @@ export function AuthProvider({ children }) {
     if (!user) return false;
     
     const permissions = {
-      'AdminPrincipal': ['dashboard', 'pedidos', 'comunidades', 'clientes', 'usuarios', 'bitacora', 'crear_usuario', 'eliminar_pedido', 'cambiar_password', 'desactivar_usuario'],
-      'AdminSecundario': ['dashboard', 'pedidos', 'comunidades', 'clientes', 'bitacora', 'eliminar_pedido'],
-      'Repartidor': ['pedidos', 'crear_pedido']
+      1: ['dashboard', 'pedidos', 'comunidades', 'clientes', 'usuarios', 'bitacora'],     // Admin Principal - TODO
+      2: ['dashboard', 'pedidos', 'comunidades', 'clientes', 'bitacora'],               // Admin Secundario - TODO EXCEPTO usuarios
+      3: ['pedidos']                                                                    // Repartidor - Solo pedidos
     };
     
-    return permissions[user.rol]?.includes(permission) || false;
+    return permissions[user.idRol]?.includes(permission) || false;
+  };
+
+  const isAdmin = () => {
+    // Admin Principal (1) o Admin Secundario (2)
+    return user && [1, 2].includes(user.idRol);
+  };
+
+  const isRepartidor = () => {
+    // Solo Repartidor (3)
+    return user && user.idRol === 3;
+  };
+
+  const canAccessPage = (requiredRole) => {
+    // requiredRole puede ser un número o array de números
+    if (!user) return false;
+    if (Array.isArray(requiredRole)) {
+      return requiredRole.includes(user.idRol);
+    }
+    return user.idRol === requiredRole;
   };
 
   const value = {
@@ -98,6 +162,9 @@ export function AuthProvider({ children }) {
     login,
     logout,
     hasPermission,
+    isAdmin,
+    isRepartidor,
+    canAccessPage,
     isAuthenticated: !!user
   };
 

@@ -1,5 +1,14 @@
 import axios from 'axios';
 
+// Función para generar UUID
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 // Configuración base de la API
 const API_BASE_URL = 'https://localhost:7004';
 
@@ -8,7 +17,6 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // Para desarrollo: ignorar certificados autofirmados
   withCredentials: false
 });
 
@@ -31,10 +39,20 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const isLoginEndpoint = error.config?.url?.includes('/api/Auth/login');
+      if (!isLoginEndpoint) {
+        const token = localStorage.getItem('token');
+        console.error('🔴 401 Unauthorized en:', error.config?.url);
+        console.error('🔴 Token en localStorage:', token ? `${token.substring(0, 30)}...` : 'NO HAY TOKEN');
+        console.error('🔴 Header enviado:', error.config?.headers?.Authorization ? 'presente' : 'AUSENTE');
+        console.error('🔴 Respuesta del backend:', error.response?.data);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Usar navigate de React Router evitaría la recarga, pero como el interceptor
+        // vive fuera del árbol React, usamos un evento personalizado para que AuthContext
+        // maneje el logout y luego React Router navegue suavemente.
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+      }
     }
     return Promise.reject(error);
   }
@@ -92,7 +110,11 @@ export const orderService = {
   },
   
   create: async (orderData) => {
-    const response = await api.post('/api/Pedidos', orderData);
+    const response = await api.post('/api/Pedidos', orderData, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   },
   
@@ -127,6 +149,9 @@ export const communityService = {
       nombreComunidad: nombre,
       idUsuarioCreador: idUsuarioCreador
     }, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      },
       validateStatus: (status) => status >= 200 && status < 300
     });
     return response.data;
@@ -137,6 +162,9 @@ export const communityService = {
       nombreComunidad: nombre,
       idUsuarioModificador: idUsuarioModificador
     }, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      },
       validateStatus: (status) => status >= 200 && status < 300
     });
     return response.data;
@@ -144,6 +172,9 @@ export const communityService = {
 
   toggleEstado: async (id, activa) => {
     const response = await api.patch(`/api/Comunidades/${id}/estado`, { activa }, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      },
       validateStatus: (status) => status >= 200 && status < 300
     });
     return response.data;
@@ -169,18 +200,28 @@ export const clientService = {
 
   create: async (clientData) => {
     const response = await api.post('/api/Clientes', clientData, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      },
       validateStatus: (status) => status >= 200 && status < 300
     });
     return response.data;
   },
 
   update: async (id, clientData) => {
-    const response = await api.put(`/api/Clientes/${id}`, clientData);
+    const response = await api.put(`/api/Clientes/${id}`, clientData, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   },
 
   toggleEstado: async (id, activo) => {
     const response = await api.patch(`/api/Clientes/${id}/estado`, { activo }, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      },
       validateStatus: (status) => status >= 200 && status < 300
     });
     return response.data;
@@ -200,29 +241,49 @@ export const userService = {
   },
   
   create: async (userData) => {
-    const response = await api.post('/api/Usuarios', userData);
+    const response = await api.post('/api/Usuarios', userData, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   },
   
   changePassword: async (userId, newPassword) => {
     const response = await api.put(`/api/Usuarios/${userId}/cambiar-contrasena`, {
       nuevaContrasena: newPassword
+    }, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
     });
     return response.data;
   },
   
   deactivate: async (userId) => {
-    const response = await api.put(`/api/Usuarios/${userId}/desactivar`);
+    const response = await api.put(`/api/Usuarios/${userId}/desactivar`, {}, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   },
 
   reactivate: async (userId) => {
-    const response = await api.put(`/api/Usuarios/${userId}/habilitar`);
+    const response = await api.put(`/api/Usuarios/${userId}/habilitar`, {}, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   },
 
   update: async (userId, userData) => {
-    const response = await api.put(`/api/Usuarios/${userId}`, userData);
+    const response = await api.put(`/api/Usuarios/${userId}`, userData, {
+      headers: {
+        'Idempotency-Key': generateUUID()
+      }
+    });
     return response.data;
   }
 };

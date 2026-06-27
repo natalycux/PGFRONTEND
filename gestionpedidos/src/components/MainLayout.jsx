@@ -4,7 +4,7 @@ import { Droplets, LogOut } from 'lucide-react';
 import './MainLayout.css';
 
 const MainLayout = () => {
-  const { user, logout, hasPermission } = useAuth();
+  const { user, logout, isAdmin, isRepartidor, hasPermission } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -37,36 +37,42 @@ const MainLayout = () => {
       </header>
 
       <nav className="main-nav">
+        {/* Dashboard - Admins y Repartidor */}
         {hasPermission('dashboard') && (
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Dashboard
           </NavLink>
         )}
         
+        {/* Pedidos - Admins y Repartidor */}
         {hasPermission('pedidos') && (
           <NavLink to="/pedidos" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Pedidos
           </NavLink>
         )}
 
+        {/* Comunidades - Solo Admins */}
         {hasPermission('comunidades') && (
           <NavLink to="/comunidades" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Comunidades
           </NavLink>
         )}
 
+        {/* Clientes - Solo Admins */}
         {hasPermission('clientes') && (
           <NavLink to="/clientes" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Clientes
           </NavLink>
         )}
         
+        {/* Usuarios - Solo Admin Principal */}
         {hasPermission('usuarios') && (
           <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Usuarios
           </NavLink>
         )}
         
+        {/* Bitácora - Solo Admins */}
         {hasPermission('bitacora') && (
           <NavLink to="/bitacora" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Bitácora

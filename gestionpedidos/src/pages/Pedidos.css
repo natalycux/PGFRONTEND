@@ -253,9 +253,15 @@
 /* nombre + fila de nombre */
 .order-name-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 6px;
+}
+
+.order-client-and-community {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .order-client-name {
@@ -263,6 +269,12 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+}
+
+.order-community-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .order-client-name.cancelled-name {
