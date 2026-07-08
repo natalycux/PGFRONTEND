@@ -10,7 +10,7 @@ const generateUUID = () => {
 };
 
 // Configuración base de la API
-const API_BASE_URL = 'https://localhost:7004';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7004';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
