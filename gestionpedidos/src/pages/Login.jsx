@@ -42,16 +42,9 @@ const Login = () => {
             <Droplets size={40} color="white" />
           </div>
           <h1>Gestión de Pedidos de Agua</h1>
-          <p className="login-subtitle">Iniciar Sesión</p>
         </div>
 
         <div className="login-body">
-          <div className="default-user-info">
-            <p className="info-title">Usuario por defecto:</p>
-            <p className="info-text">Email: admin1@pnj.local</p>
-            <p className="info-text">Contraseña: Admin26</p>
-          </div>
-
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label>Correo Electrónico</label>
