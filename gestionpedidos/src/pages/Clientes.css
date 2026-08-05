@@ -230,6 +230,7 @@
 .cli-filter-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   background: #fff;
   border-radius: 12px;
@@ -261,6 +262,44 @@
 }
 
 .cli-filter-select:focus { border-color: #2563eb; }
+
+.cli-filter-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.cli-tipo-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cli-tipo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+
+.cli-tipo-btn:hover { border-color: #94a3b8; }
+
+.cli-tipo-btn--active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
 
 /* ─── Tabla ─────────────────────────────────────────────────── */
 .cli-table-card {

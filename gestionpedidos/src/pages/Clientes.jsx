@@ -1,15 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
-import { clientService, communityService } from '../services/api';
-import { Users, Building2, Phone, Plus, X, Save, Pencil, XCircle, CheckCircle } from 'lucide-react';
+import { clientService, communityService, orderService } from '../services/api';
+import { Users, Building2, Phone, Plus, X, Save, Pencil, XCircle, CheckCircle, Gift, Percent, ShoppingCart } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Pagination from '../components/Pagination';
 import './Clientes.css';
 
+const normalizeTipo = (tipo) => (tipo === 'Donación' ? 'Donacion' : tipo);
+
+const TIPO_FILTROS = [
+  { value: 'Venta',     label: 'Venta',     icon: ShoppingCart },
+  { value: 'Descuento', label: 'Descuento', icon: Percent },
+  { value: 'Donacion',  label: 'Donación',  icon: Gift }
+];
+
 const Clientes = () => {
   const [clients, setClients] = useState([]);
   const [communities, setCommunities] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterCommunity, setFilterCommunity] = useState('');
+  const [selectedTipos, setSelectedTipos] = useState([]);
 
   // Formulario crear
   const [showForm, setShowForm] = useState(false);
@@ -41,12 +51,14 @@ const Clientes = () => {
 
   const loadAll = async () => {
     try {
-      const [clientsData, communitiesData] = await Promise.all([
+      const [clientsData, communitiesData, ordersData] = await Promise.all([
         clientService.getAll(),
-        communityService.getAll()
+        communityService.getAll(),
+        orderService.getAll().catch(() => [])
       ]);
       setClients(clientsData);
       setCommunities(communitiesData);
+      setOrders(ordersData);
     } catch (err) {
       console.error('Error cargando clientes:', err);
     } finally {
@@ -63,10 +75,30 @@ const Clientes = () => {
   // Comunidades activas (para los formularios)
   const activeCommunityList = communities.filter(c => c.activa);
 
+  // Tipos de transacción que ha tenido cada cliente, según su historial de pedidos
+  const clientTiposMap = new Map();
+  orders.forEach((o) => {
+    const tipo = normalizeTipo(o.tipoTransaccion);
+    if (!clientTiposMap.has(o.idCliente)) clientTiposMap.set(o.idCliente, new Set());
+    clientTiposMap.get(o.idCliente).add(tipo);
+  });
+
+  const toggleTipo = (tipo) => {
+    setSelectedTipos((prev) =>
+      prev.includes(tipo) ? prev.filter((t) => t !== tipo) : [...prev, tipo]
+    );
+    setCurrentPage(1);
+  };
+
   // ── Filtrado ───────────────────────────────────────────────────
-  const filtered = filterCommunity
-    ? clients.filter(c => String(c.idComunidad) === filterCommunity)
-    : clients;
+  const filtered = clients.filter((c) => {
+    if (filterCommunity && String(c.idComunidad) !== filterCommunity) return false;
+    if (selectedTipos.length > 0) {
+      const tiposCliente = clientTiposMap.get(c.idCliente) || new Set();
+      if (!selectedTipos.some((t) => tiposCliente.has(t))) return false;
+    }
+    return true;
+  });
   const sortedFiltered = [...filtered].sort((a, b) => {
     const aId = Number(a.idCliente ?? a.id ?? 0);
     const bId = Number(b.idCliente ?? b.id ?? 0);
@@ -455,6 +487,23 @@ const Clientes = () => {
             <option key={c.idComunidad} value={c.idComunidad}>{c.nombreComunidad}</option>
           ))}
         </select>
+
+        <span className="cli-filter-divider" />
+
+        <span className="cli-filter-label">Tipo:</span>
+        <div className="cli-tipo-filters">
+          {TIPO_FILTROS.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              className={`cli-tipo-btn${selectedTipos.includes(value) ? ' cli-tipo-btn--active' : ''}`}
+              onClick={() => toggleTipo(value)}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Tabla ── */}
