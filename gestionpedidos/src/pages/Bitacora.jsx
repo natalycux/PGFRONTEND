@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { auditLogService, clientService } from '../services/api';
-import { LogIn, Plus, Trash2, UserPlus, UserCheck, Users, Clock, Calendar, X, RefreshCw, KeyRound, ToggleRight, Pencil, Ban } from 'lucide-react';
+import { LogIn, Plus, Trash2, UserPlus, UserCheck, Users, Clock, Calendar, RefreshCw, KeyRound, ToggleRight, Pencil, Ban } from 'lucide-react';
 import './Bitacora.css';
 
 // ── Calendario popup ─────────────────────────────────────────────────────────
@@ -192,11 +192,6 @@ const Bitacora = () => {
     setEndDate(t);
   };
 
-  const handleVerTodo = () => {
-    setStartDate(null);
-    setEndDate(null);
-  };
-
   const formatDate = (d) => d ? d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
 
   // Reemplaza "Cliente ID: 129" → "Cliente Nataly Recinos" en la descripción
@@ -370,9 +365,6 @@ const Bitacora = () => {
 
           {/* Botones */}
           <div className="filter-btns">
-            <button className="btn-ver-todo" onClick={handleVerTodo}>
-              <X size={14} /> Ver Todo
-            </button>
             <button className="btn-hoy" onClick={handleToday}>
               <Clock size={14} /> Hoy
             </button>
