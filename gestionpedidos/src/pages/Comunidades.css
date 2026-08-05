@@ -222,12 +222,13 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,.09);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .com-table-header {
   display: grid;
-  grid-template-columns: 88px minmax(260px, 1.35fr) 150px 1fr 1fr 132px;
+  grid-template-columns: 88px minmax(260px, 1.35fr) 150px minmax(0, 1fr) minmax(0, 1fr) 132px;
+  min-width: 780px;
   padding: 12px 24px;
   font-size: 11.5px;
   font-weight: 700;
@@ -246,7 +247,8 @@
 
 .com-table-row {
   display: grid;
-  grid-template-columns: 88px minmax(260px, 1.35fr) 150px 1fr 1fr 132px;
+  grid-template-columns: 88px minmax(260px, 1.35fr) 150px minmax(0, 1fr) minmax(0, 1fr) 132px;
+  min-width: 780px;
   align-items: center;
   min-height: 82px;
   padding: 14px 24px;
@@ -292,6 +294,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .com-community-icon {
@@ -332,17 +335,24 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 
 .com-community-name {
   font-size: 14px;
   font-weight: 600;
   color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .com-cell {
   font-size: 13.5px;
   color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Acciones */
@@ -488,7 +498,8 @@
 @media (max-width: 768px) {
   .com-table-header,
   .com-table-row {
-    grid-template-columns: 72px 1fr 118px 104px;
+    grid-template-columns: 72px minmax(0, 1fr) 118px 104px;
+    min-width: 0;
   }
 
   .com-table-header span:nth-child(4),

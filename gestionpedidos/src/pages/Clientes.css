@@ -267,12 +267,13 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,.09);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .cli-table-header {
   display: grid;
-  grid-template-columns: 88px minmax(240px, 1.3fr) 150px 1fr 0.9fr 2fr 130px;
+  grid-template-columns: 88px minmax(240px, 1.3fr) 150px minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 2fr) 130px;
+  min-width: 980px;
   padding: 12px 24px;
   font-size: 11.5px;
   font-weight: 700;
@@ -289,7 +290,8 @@
 
 .cli-table-row {
   display: grid;
-  grid-template-columns: 88px minmax(240px, 1.3fr) 150px 1fr 0.9fr 2fr 130px;
+  grid-template-columns: 88px minmax(240px, 1.3fr) 150px minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 2fr) 130px;
+  min-width: 980px;
   align-items: center;
   padding: 14px 24px;
   min-height: 92px;
@@ -307,7 +309,8 @@
   padding-top: 14px;
   padding-bottom: 14px;
   gap: 8px;
-  grid-template-columns: 88px minmax(240px, 1.3fr) 150px 1fr 0.9fr 2fr 160px;
+  grid-template-columns: 88px minmax(240px, 1.3fr) 150px minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 2fr) 160px;
+  min-width: 1010px;
 }
 
 .cli-row--editing .cli-cell-actions {
@@ -350,6 +353,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .cli-client-icon {
@@ -390,17 +394,24 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 
 .cli-client-name {
   font-size: 15px;
   font-weight: 600;
   color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cli-cell {
   font-size: 14px;
   color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cli-cell-dir {
@@ -557,7 +568,8 @@
 
   .cli-table-header,
   .cli-table-row {
-    grid-template-columns: 72px 1.2fr 118px 100px;
+    grid-template-columns: 72px minmax(0, 1.2fr) 118px 100px;
+    min-width: 0;
   }
 
   /* Ocultar comunidad, telefono y direccion en pantallas pequenas */
