@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/api';
+import { sessionManager } from '../services/sessionManager';
 
 const AuthContext = createContext(null);
 
@@ -41,6 +42,12 @@ export function AuthProvider({ children }) {
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
+
+  // Vigila la inactividad del usuario (mouse, teclado, scroll, touch) mientras haya sesión activa
+  useEffect(() => {
+    if (user) sessionManager.start();
+    return () => sessionManager.stop();
+  }, [user]);
 
   const login = async (email, password) => {
     try {
