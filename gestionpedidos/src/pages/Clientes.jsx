@@ -230,6 +230,20 @@ const Clientes = () => {
     const accion = estaActivo ? 'desactivar' : 'activar';
     const accionPasado = estaActivo ? 'desactivado' : 'activado';
 
+    if (!estaActivo) {
+      const comunidad = communities.find(c => c.idComunidad === client.idComunidad);
+      if (comunidad && !comunidad.activa) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Comunidad desactivada',
+          text: `No puedes activar a "${client.nombreCompleto}" porque su comunidad "${comunidad.nombreComunidad}" está desactivada. Activa primero la comunidad.`,
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Entendido'
+        });
+        return;
+      }
+    }
+
     const result = await Swal.fire({
       title: `¿${estaActivo ? 'Desactivar' : 'Activar'} cliente?`,
       text: `"${client.nombreCompleto}" será ${accionPasado}.`,
