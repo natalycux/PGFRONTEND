@@ -178,10 +178,14 @@ const Comunidades = () => {
     const nuevaActiva = !community.activa;
     const accion = nuevaActiva ? 'activar' : 'desactivar';
     const accionPasado = nuevaActiva ? 'activada' : 'desactivada';
+    const clientesActivos = community.cantidadClientesActivos ?? 0;
+    const afectaClientes = !nuevaActiva && clientesActivos > 0;
 
     const result = await Swal.fire({
       title: `¿${nuevaActiva ? 'Activar' : 'Desactivar'} comunidad?`,
-      text: `"${community.nombreComunidad}" será ${accionPasado}.`,
+      text: afectaClientes
+        ? `¿Está seguro de desactivar ${clientesActivos} cliente${clientesActivos === 1 ? '' : 's'} junto con la comunidad "${community.nombreComunidad}"?`
+        : `"${community.nombreComunidad}" será ${accionPasado}.`,
       icon: nuevaActiva ? 'question' : 'warning',
       showCancelButton: true,
       confirmButtonColor: nuevaActiva ? '#16a34a' : '#e11d48',
