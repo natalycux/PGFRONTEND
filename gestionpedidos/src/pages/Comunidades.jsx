@@ -3,6 +3,7 @@ import { communityService, userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Building2, Plus, X, Save, Pencil, XCircle, CheckCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
+import Pagination from '../components/Pagination';
 import './Comunidades.css';
 
 const Comunidades = () => {
@@ -26,6 +27,10 @@ const Comunidades = () => {
 
   // Toggle estado (desactivar / activar)
   const [toggleLoading, setToggleLoading] = useState(false);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     load();
@@ -215,6 +220,15 @@ const Comunidades = () => {
     return aId - bId;
   });
 
+  const totalPages = Math.max(1, Math.ceil(sortedCommunities.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedCommunities = sortedCommunities.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
   if (loading) return <div className="loading">Cargando comunidades...</div>;
 
   return (
@@ -319,7 +333,7 @@ const Comunidades = () => {
           </div>
         ) : (
           <div className="com-table-body">
-            {sortedCommunities.map((c) => (
+            {paginatedCommunities.map((c) => (
               <div key={c.idComunidad}>
                 {/* Fila normal */}
                 {editingId !== c.idComunidad && (
@@ -428,6 +442,14 @@ const Comunidades = () => {
             ))}
           </div>
         )}
+
+        <Pagination
+          currentPage={safePage}
+          totalItems={sortedCommunities.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

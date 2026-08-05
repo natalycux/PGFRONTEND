@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { clientService, communityService } from '../services/api';
 import { Users, Building2, Phone, Plus, X, Save, Pencil, XCircle, CheckCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
+import Pagination from '../components/Pagination';
 import './Clientes.css';
 
 const Clientes = () => {
@@ -25,6 +26,10 @@ const Clientes = () => {
 
   // Toggle estado
   const [toggleLoading, setToggleLoading] = useState(false);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     loadAll();
@@ -67,6 +72,20 @@ const Clientes = () => {
     const bId = Number(b.idCliente ?? b.id ?? 0);
     return aId - bId;
   });
+
+  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedClients = sortedFiltered.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (value) => {
+    setFilterCommunity(value);
+    setCurrentPage(1);
+  };
 
   // ── Crear ──────────────────────────────────────────────────────
   const openForm = () => {
@@ -396,7 +415,7 @@ const Clientes = () => {
         <select
           className="cli-filter-select"
           value={filterCommunity}
-          onChange={(e) => setFilterCommunity(e.target.value)}
+          onChange={(e) => handleFilterChange(e.target.value)}
         >
           <option value="">Todas las comunidades</option>
           {communities.map(c => (
@@ -425,7 +444,7 @@ const Clientes = () => {
           </div>
         ) : (
           <div className="cli-table-body">
-            {sortedFiltered.map((client) => (
+            {paginatedClients.map((client) => (
               <div key={client.idCliente}>
 
                 {/* Fila normal */}
@@ -539,6 +558,14 @@ const Clientes = () => {
             ))}
           </div>
         )}
+
+        <Pagination
+          currentPage={safePage}
+          totalItems={sortedFiltered.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );
