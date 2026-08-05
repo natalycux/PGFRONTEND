@@ -12,6 +12,7 @@ class SessionManager {
 
   start() {
     this.stop(); // evita timers duplicados si start() se llama dos veces
+    console.debug('[sessionManager] start() — temporizador de inactividad iniciado');
     this.resetActivity();
     ACTIVITY_EVENTS.forEach((evento) => {
       window.addEventListener(evento, this.resetActivity, { passive: true });
@@ -26,7 +27,8 @@ class SessionManager {
     });
   }
 
-  resetActivity() {
+  resetActivity(e) {
+    if (e) console.debug(`[sessionManager] reinicio por evento: ${e.type}`);
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(this.onExpire, INACTIVITY_MINUTES * 60 * 1000);
   }
