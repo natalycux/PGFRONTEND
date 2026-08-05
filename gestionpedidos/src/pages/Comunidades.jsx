@@ -82,7 +82,11 @@ const Comunidades = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newName.trim()) { setCreateError('El nombre es obligatorio.'); return; }
-    
+    if (/^\d+$/.test(newName.trim().replace(/\s+/g, ''))) {
+      setCreateError('El nombre no puede contener solo números.');
+      return;
+    }
+
     // Validar si ya existe una comunidad con ese nombre
     const nombreLower = newName.trim().toLowerCase();
     const exists = communities.some(
@@ -156,6 +160,10 @@ const Comunidades = () => {
 
   const handleUpdate = async (id) => {
     if (!editName.trim()) { setEditError('El nombre es obligatorio.'); return; }
+    if (/^\d+$/.test(editName.trim().replace(/\s+/g, ''))) {
+      setEditError('El nombre no puede contener solo números.');
+      return;
+    }
     setEditLoading(true);
     try {
       await communityService.update(id, editName.trim(), user?.id);

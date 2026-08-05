@@ -103,8 +103,20 @@ const Clientes = () => {
 
   const validateForm = (data) => {
     const errs = {};
-    if (!data.nombre.trim()) errs.nombre = 'El nombre es obligatorio.';
+    const nombreTrim = data.nombre.trim();
+    if (!nombreTrim) {
+      errs.nombre = 'El nombre es obligatorio.';
+    } else if (/^\d+$/.test(nombreTrim.replace(/\s+/g, ''))) {
+      errs.nombre = 'El nombre no puede contener solo números.';
+    }
+
     if (!data.communityId) errs.communityId = 'Selecciona una comunidad.';
+
+    const telefonoTrim = (data.telefono || '').trim();
+    if (telefonoTrim && !/^\d{8}$/.test(telefonoTrim)) {
+      errs.telefono = 'El teléfono debe tener 8 dígitos numéricos.';
+    }
+
     return errs;
   };
 
@@ -383,14 +395,21 @@ const Clientes = () => {
               </div>
 
               <div className="cli-field">
-                <label className="cli-field-label">Teléfono (Opcional)</label>
+                <label className="cli-field-label">Teléfono (Opcional, 8 dígitos)</label>
                 <input
-                  className="cli-input"
+                  className={`cli-input${formErrors.telefono ? ' cli-input--error' : ''}`}
                   type="text"
-                  placeholder="Ej: 555-1234"
+                  inputMode="numeric"
+                  maxLength={8}
+                  placeholder="Ej: 12345678"
                   value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  onChange={(e) => {
+                    const soloDigitos = e.target.value.replace(/\D/g, '').slice(0, 8);
+                    setFormData({ ...formData, telefono: soloDigitos });
+                    setFormErrors({ ...formErrors, telefono: '' });
+                  }}
                 />
+                {formErrors.telefono && <p className="cli-field-error">{formErrors.telefono}</p>}
               </div>
 
               <div className="cli-field">
@@ -543,11 +562,18 @@ const Clientes = () => {
                     </div>
                     <div className="cli-edit-cell">
                       <input
-                        className="cli-input cli-input--inline"
-                        placeholder="Teléfono"
+                        className={`cli-input cli-input--inline${editErrors.telefono ? ' cli-input--error' : ''}`}
+                        placeholder="Teléfono (8 dígitos)"
+                        inputMode="numeric"
+                        maxLength={8}
                         value={editData.telefono}
-                        onChange={(e) => setEditData({ ...editData, telefono: e.target.value })}
+                        onChange={(e) => {
+                          const soloDigitos = e.target.value.replace(/\D/g, '').slice(0, 8);
+                          setEditData({ ...editData, telefono: soloDigitos });
+                          setEditErrors({ ...editErrors, telefono: '' });
+                        }}
                       />
+                      {editErrors.telefono && <p className="cli-field-error">{editErrors.telefono}</p>}
                     </div>
                     <div className="cli-edit-cell">
                       <input
