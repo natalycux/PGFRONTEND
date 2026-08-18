@@ -349,7 +349,7 @@ const Usuarios = () => {
               </div>
 
               <div className="form-group">
-                <label>Correo Electronico *</label>
+                <label>Correo Electrónico *</label>
                 <input
                   type="email"
                   value={editUser.email}
@@ -407,7 +407,7 @@ const Usuarios = () => {
               </div>
 
               <div className="form-group">
-                <label>Correo Electronico *</label>
+                <label>Correo Electrónico *</label>
                 <input
                   type="email"
                   placeholder="usuario@ejemplo.com"
@@ -418,7 +418,7 @@ const Usuarios = () => {
               </div>
 
               <div className="form-group">
-                <label>Contrasena *</label>
+                <label>Contraseña *</label>
                 <input
                   type="password"
                   placeholder="••••••••"
